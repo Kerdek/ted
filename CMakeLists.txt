@@ -4,9 +4,16 @@ set(CMAKE_CXX_STANDARD 17)
 
 project (ted)
 
+add_subdirectory(googletest)
+
 add_library (ted INTERFACE)
 
 target_include_directories(ted INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
+
+add_executable (ted_tests tests.cpp)
+target_link_libraries(ted_tests PRIVATE gtest ted)
+#target_include_directories(ted_tests PRIVATE ${gtest_SOURCE_DIR}/include)
+add_test(NAME ted_tests COMMAND ted_tests)
