@@ -88,8 +88,8 @@ template<                               \
 
 prefix_alias(plus, +)
 prefix_alias(minus, -)
-prefix_alias(dereference, *)
-prefix_alias(addressof, &)
+prefix_alias(deref, *)
+prefix_alias(address, &)
 prefix_alias(negate, !)
 prefix_alias(bit_complement, ~)
 prefix_alias(pre_increment, ++)
@@ -121,9 +121,12 @@ template<
     auto subscript(
         Self &&self,
         Index &&i)
-    -> decltype(same(self)[same(i)])
+    -> decltype(
+        same(self)[
+            same(i)])
 {
-    return same(self)[same(i)];
+    return same(self)[
+        same(i)];
 }
 
 template<
@@ -132,9 +135,12 @@ template<
     auto invoke(
         Self &&self,
         Args &&...args)
-    -> decltype(same(self)(same(args)...))
+    -> decltype(
+        same(self)(
+            same(args)...))
 {
-    return same(self)(same(args)...);
+    return same(self)(
+        same(args)...);
 }
 
 }
