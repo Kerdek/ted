@@ -42,11 +42,10 @@ optionally moved from when invoked.
 #ifndef H_C18F11C6_324A_42F5_925B_C0B3AE1A7BA0
 #define H_C18F11C6_324A_42F5_925B_C0B3AE1A7BA0
 
-#include <ted/address.hpp>
-
 #include <type_traits>
 
 #include <ted/assuming.hpp>
+#include <ted/same.hpp>
 
 namespace ted
 {
@@ -61,7 +60,7 @@ template<
 template<
     typename T>
     auto obj(
-        T x)
+        T &&x)
     noexcept -> T
 {
     return same(x);
@@ -110,6 +109,7 @@ template<
 
 }
 
+#include <ted/nosame.hpp>
 #include <ted/noassuming.hpp>
 
 #endif
