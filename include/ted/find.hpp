@@ -29,7 +29,7 @@ template<
 auto find(
     Range &&range,
     Value &&value)
--> bool
+-> auto
 {
     using std::find;
 
