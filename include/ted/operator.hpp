@@ -2,7 +2,7 @@
              operator.hpp
 
         -- operator aliases --
-   
+
 original (c) 2021 theodoric e. stier
 public domain
 
@@ -68,11 +68,11 @@ infix_alias(extract, >>)
 infix_alias(left_shift, <<)
 infix_alias(insert, <<)
 infix_alias(equal, ==)
+infix_alias(unequal, !=)
 infix_alias(less, <)
 infix_alias(greater, >)
 infix_alias(less_equal, <=)
 infix_alias(greater_equal, >=)
-infix_alias(not_equal, !=)
 
 #undef infix_alias
 
