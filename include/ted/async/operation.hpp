@@ -27,20 +27,16 @@ namespace ted::async
 {
 
 template<
-    typename Resume,
     typename Operation>
 concept operation = requires (
-    Operation self,
-    Resume r)
+    Operation self)
 {
-    static_cast<bool>(done(self));
-    then(self, r);
-    result(same(self));
+    static_cast<bool>(done(obj(self)));
+    result(obj(same(self)));
 };
 
 template<
-    typename Resume,
-    operation<Resume> Task>
+    operation Task>
 struct awaitable_t
 {
     Task task;
@@ -73,6 +69,8 @@ struct awaitable_t
             obj(same_const(task)));
     }
 
+    template<
+        typename Resume>
     auto await_suspend(
         Resume &&resume)
     & -> decltype(auto)
@@ -82,6 +80,8 @@ struct awaitable_t
             same(resume));
     }
 
+    template<
+        typename Resume>
     auto await_suspend(
         Resume &&resume)
     && -> decltype(auto)
@@ -91,6 +91,8 @@ struct awaitable_t
             same(resume));
     }
 
+    template<
+        typename Resume>
     auto await_suspend(
         Resume &&resume)
     const & -> decltype(auto)
@@ -100,6 +102,8 @@ struct awaitable_t
             same(resume));
     }
 
+    template<
+        typename Resume>
     auto await_suspend(
         Resume &&resume)
     const && -> decltype(auto)
@@ -137,12 +141,10 @@ struct awaitable_t
 };
 
 template<
-    typename Resume,
-    operation<Resume> Operation>
+    operation Operation>
     auto operator co_await(
         Operation &&operation)
     noexcept -> awaitable_t<
-        Resume,
         std::remove_reference_t<
             Operation>>
 {
