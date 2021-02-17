@@ -10,8 +10,8 @@ as a policy, we avoid monopolizing any
 language feature other than a normal
 function name as a customization point.
 therefore, when an operation should be
-customizable, we prefer to use one of 
-the below names. this file provides a 
+customizable, we prefer to use one of
+the below names. this file provides a
 default implementation in terms of the
 usual operator, and with the strongest
 possible constraint.
@@ -35,7 +35,7 @@ namespace ted
 template<                               \
     typename Lhs,                       \
     typename Rhs>                       \
-    auto name(                          \
+    constexpr auto name(                \
         Lhs &&lhs,                      \
         Rhs &&rhs)                      \
     -> decltype(same(lhs) op same(rhs)) \
@@ -79,7 +79,7 @@ infix_alias(greater_equal, >=)
 #define prefix_alias(name, op)          \
 template<                               \
     typename Operand>                   \
-    auto name(                          \
+    constexpr auto name(                \
         Operand &&operand)              \
     -> decltype(op same(operand))       \
 {                                       \
@@ -88,7 +88,7 @@ template<                               \
 
 prefix_alias(plus, +)
 prefix_alias(minus, -)
-prefix_alias(deref, *)
+prefix_alias(follow, *)
 prefix_alias(address, &)
 prefix_alias(negate, !)
 prefix_alias(bit_complement, ~)
@@ -99,7 +99,7 @@ prefix_alias(pre_decrement, --)
 
 template<
     typename Operand>
-    auto increment(
+    constexpr auto increment(
         Operand &&operand)
     -> decltype(same(operand)++)
 {
@@ -108,7 +108,7 @@ template<
 
 template<
     typename Operand>
-    auto decrement(
+    constexpr auto decrement(
         Operand &&operand)
     -> decltype(same(operand)--)
 {
@@ -118,7 +118,7 @@ template<
 template<
     typename Self,
     typename Index>
-    auto subscript(
+    constexpr auto subscript(
         Self &&self,
         Index &&i)
     -> decltype(
@@ -132,7 +132,7 @@ template<
 template<
     typename Self,
     typename ...Args>
-    auto invoke(
+    constexpr auto invoke(
         Self &&self,
         Args &&...args)
     -> decltype(
@@ -143,8 +143,48 @@ template<
         same(args)...);
 }
 
+template<
+    typename Object>
+    constexpr auto non_allocating_new_default(
+        Object *address)
+    -> Object *
+{
+    return new (address) Object;
 }
 
-#include <ted/nosame.hpp>
+template<
+    typename Object,
+    typename ...Args>
+    constexpr auto non_allocating_new(
+        Object *address,
+        Args &&...args)
+    -> Object *
+{
+    return new (address) Object(
+        same(args)...);
+}
+
+template<
+    typename Object,
+    typename ...Args>
+    constexpr auto non_allocating_new_list(
+        Object *address,
+        Args &&...args)
+    -> Object *
+{
+    return new (address) Object{
+        same(args)... };
+}
+
+template<
+    typename Object>
+    constexpr auto destroy(
+        Object &object)
+    noexcept -> void
+{
+    object.~Object();
+}
+
+}
 
 #endif
