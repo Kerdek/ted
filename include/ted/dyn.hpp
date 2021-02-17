@@ -17,15 +17,16 @@ the rest of libted. not callable with
 #ifndef H_88B7B750_A12C_4B1B_AD4A_DB4DDD39F14B
 #define H_88B7B750_A12C_4B1B_AD4A_DB4DDD39F14B
 
-#include <ted/address_of.hpp>
+#include <ted/category.hpp>
 #include <ted/hyp.hpp>
+#include <ted/iterator.hpp>
+#include <ted/pointer.hpp>
 #include <ted/ref.hpp>
-#include <ted/similar_category.hpp>
+#include <ted/same.hpp>
 
 #include <memory>
 #include <type_traits>
 
-#include <ted/same.hpp>
 
 namespace ted::erasure
 {
@@ -40,150 +41,126 @@ template<
     struct abstract_t<
         Y(X...)>
 {
-    virtual ~abstract_t() =
-        default;
-    
-    virtual auto dyn_invoke(
+    virtual ~abstract_t()
+    = default;
+
+    virtual auto invoke_dyn(
         X &&...)
     & -> Y = 0;
-    virtual auto dyn_invoke(
+    virtual auto invoke_dyn(
         X &&...)
     && -> Y = 0;
-    virtual auto dyn_invoke(
+    virtual auto invoke_dyn(
         X &&...)
     const & -> Y = 0;
-    virtual auto dyn_invoke(
+    virtual auto invoke_dyn(
         X &&...)
     const && -> Y = 0;
 };
 
 template<
-    typename F,
-    typename ...X>
-    auto dyn_invoke(
-        F &&f,
-        X &&...x)
-    -> decltype(
-        same(f).dyn_invoke(
-            same(x)...))
+    typename Abstract,
+    typename ...Args>
+    auto invoke_dyn(
+        Abstract &&self,
+        Args &&...x)
+    -> decltype(auto)
 {
-    return same(f).dyn_invoke(
+    return same(self).invoke_dyn(
         same(x)...);
 }
 
 template<
     typename F,
-    typename G>
+    typename Invocable>
     struct concrete_t;
 
 template<
     typename Y,
     typename ...X,
-    typename G>
-    struct concrete_t<Y(X...), G> :
+    typename InvocableObject>
+    struct concrete_t<
+        Y(X...),
+        InvocableObject> :
         abstract_t<Y(X...)>
 {
     static_assert(
-        !std::is_reference_v<G>,
-        "concrete function object type may not be a reference.");
-    
-    using Z1 = decltype(
-        invoke(
-            obj(hyp<G &>()),
-            hyp<X>()...));
-    using Z2 = decltype(
-        invoke(
-            obj(hyp<G &&>()),
-            hyp<X>()...));
-    using Z3 = decltype(
-        invoke(
-            obj(hyp<const G &>()),
-            hyp<X>()...));
-    using Z4 = decltype(
-        invoke(
-            obj(hyp<const G &&>()),
-            hyp<X>()...));
+        !std::is_reference_v<InvocableObject>,
+        "invocable type must be an\
+        object type.");
 
-    static constexpr bool P1 = 
-        std::is_convertible_v<Y, Z1>;
-    static constexpr bool P2 = 
-        std::is_convertible_v<Y, Z2>;
-    static constexpr bool P3 = 
-        std::is_convertible_v<Y, Z3>;
-    static constexpr bool P4 = 
-        std::is_convertible_v<Y, Z4>;
+    InvocableObject f;
 
-    G g;
-
-    concrete_t(G g) noexcept :
-        g(same(g))
+    concrete_t(InvocableObject f) noexcept :
+        f(same(f))
     { }
 
-    auto dyn_invoke(
+    auto invoke_dyn(
         X &&...x)
-    & -> std::enable_if_t<P1, Y>
+    & -> Y
     override
     {
         return invoke(
-            obj(g),
+            obj(f),
             same(x)...);
     }
 
-    auto dyn_invoke(
+    auto invoke_dyn(
         X &&...x)
-    && -> std::enable_if_t<P2, Y>
+    && -> Y
     override
     {
         return invoke(
-            obj(same((g))),
+            obj(same(f)),
             same(x)...);
     }
 
-    auto dyn_invoke(
+    auto invoke_dyn(
         X &&...x)
-    const & -> std::enable_if_t<P3, Y>
+    const & -> Y
     override
     {
         return invoke(
-            obj(g),
+            obj(f),
             same(x)...);
     }
 
-    auto dyn_invoke(
+    auto invoke_dyn(
         X &&...x)
-    const && -> std::enable_if_t<P4, Y>
+    const && -> Y
     override
     {
         return invoke(
-            obj(same((g))),
+            obj(same_const(f)),
             same(x)...);
     }
 };
 
 template<
-    typename F>
+    typename Invocable>
 using erasure_t =
-    std::unique_ptr<abstract_t<F>>;
+    std::unique_ptr<
+        abstract_t<Invocable>>;
 
 template<
-    typename F>
+    typename Erasure>
     auto abstract(
-        F &&f)
+        Erasure &&f)
     noexcept -> decltype(auto)
 {
-    return categorized_like<F>(
-        obj_at(same(f)));
+    return categorize_like<Erasure>(
+        ted::peek(same(f)));
 }
 
 template<
-    typename F,
-    typename ...X>
+    typename Erasure,
+    typename ...Args>
     auto invoke(
-        F &&f,
-        X &&...x)
+        Erasure &&f,
+        Args &&...x)
     -> decltype(auto)
 {
-    return dyn_invoke(
+    return invoke_dyn(
         abstract(same(f)),
         same(x)...);
 }
@@ -194,23 +171,25 @@ namespace ted
 {
 
 template<
-    typename F,
-    typename G>
+    typename Signature,
+    typename Invocable>
     auto dyn(
-        G &&g)
-    -> erasure::erasure_t<F>
+        Invocable &&f)
+    -> erasure::erasure_t<
+        Signature>
 {
-    using G1 =
-        std::remove_reference_t<G>;
-    using G2 = 
-        erasure::concrete_t<F, G1>;
+    using InvocableObject =
+        std::remove_reference_t<
+            Invocable>;
+    using Concrete = 
+        erasure::concrete_t<
+            Signature,
+            InvocableObject>;
 
-    return std::make_unique<G2>(
-        same(g));
+    return std::make_unique<Concrete>(
+        same(f));
 }
 
 }
-
-#include <ted/nosame.hpp>
 
 #endif
