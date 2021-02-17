@@ -11,8 +11,6 @@ public domain
 #define H_526586BE_63E0_455A_875D_B7EA34B8AA99
 
 #include <ted/assuming.hpp>
-#include <ted/operator.hpp>
-#include <ted/same.hpp>
 #include <ted/zero.hpp>
 
 #include <type_traits>
@@ -84,7 +82,8 @@ template<
 {
     return invoke(
         same(f),
-        invoke(same(g)));
+        invoke(
+            same(g)));
 }
 
 template<
@@ -102,9 +101,7 @@ template<
         fuzz(f, g); 
     };
 
-    repeat_n(
-        h,
-        n);
+    repeat_n(h, n);
 }
 
 }
