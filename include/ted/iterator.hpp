@@ -1,7 +1,7 @@
 /*
               iterator.hpp
 
-      -- iterator manipulators --
+       -- iterator operations --
 
 original (c) 2021 theodoric e. stier
 public domain
@@ -12,6 +12,9 @@ when manipulating iterators so that they
 can be differently customized for 
 different contexts.
 
+automatically unwraps reference
+wrappers with 'obj'.
+
 */
 
 #ifndef H_8F9F2391_A5FE_4676_8C99_160E438FEC85
@@ -19,65 +22,47 @@ different contexts.
 
 #include <ted/assuming.hpp>
 #include <ted/null.hpp>
-#include <ted/operator.hpp>
-#include <ted/pointer.hpp>
-#include <ted/same.hpp>
 
 namespace ted
 {
 
 template<
-	typename Begin,
-	typename Caret>
+	typename Lhs,
+	typename Rhs>
 	auto distance(
-		Begin &&begin,
-		Caret &&caret)
-	noexcept -> decltype(
-		minus(
-			same(caret), 
-			same(begin)))
+		Lhs &&a,
+		Rhs &&b)
+	noexcept -> decltype(auto)
 {
-	const auto ordered = negate(
-		less(
-			caret,
-			begin));
-
-	assuming(ordered)
+	assuming(less_equal(a, b))
 	{
 		return minus(
-			same(caret),
-			same(begin));
+			same(b),
+			same(a));
 	}
 }
 
 template<
-	typename Caret>
+	typename Iterator>
 	auto peek(
-		Caret &&caret)
-	noexcept -> decltype(
-		follow(
-			same(caret)))
+		Iterator &&it)
+	noexcept -> decltype(auto)
 {
-	const auto non_null = is_nonnull(
-		caret);
-
-	assuming(non_null)
+	assuming(is_nonnull(it))
 	{
 		return follow(
-			same(caret));
+			same(it));
 	}
 }
 
 template<
-	typename Caret>
+	typename Iterator>
 	auto advance(
-		Caret &&caret)
-	noexcept -> decltype(
-		increment(
-			same(caret)))
+		Iterator &&it)
+	noexcept -> decltype(auto)
 {
 	return increment(
-		same(caret));
+		same(it));
 }
 
 }
