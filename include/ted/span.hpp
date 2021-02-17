@@ -31,7 +31,7 @@ template<
 
 template<
 	typename Span>
-	auto begin(
+	constexpr auto begin(
 		Span &&self)
 	noexcept -> decltype(auto)
 {
@@ -40,7 +40,7 @@ template<
 
 template<
 	typename Span>
-	auto end(
+	constexpr auto end(
 		Span &&self)
 	noexcept -> decltype(auto)
 {
@@ -55,17 +55,14 @@ namespace ted
 template<
 	typename Begin,
 	typename End>
-	auto make_span(
+	constexpr auto make_span(
 		Begin a,
 		End b)
-	noexcept -> span::span_t<Begin, End>
+	noexcept -> span::span_t<
+		Begin,
+		End>
 {
-	auto ordered = negate(
-		less(
-			b,
-			a));
-
-	assuming(ordered)
+	assuming(negate(less(b, a)))
 	{
 		return
 		{
