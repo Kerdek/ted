@@ -18,38 +18,42 @@ points.
 #ifndef H_F92F023D_95D7_43BC_9A83_FC66880F2AB4
 #define H_F92F023D_95D7_43BC_9A83_FC66880F2AB4
 
+#include <ted/operator.hpp>
+
 #include <algorithm>
 
 namespace ted
-{    
+{
 
 template<
     typename Range,
     typename Value>
 auto find(
-    Range &&range,
-    Value &&value)
+    Range &&self,
+    Value &&x)
 -> auto
 {
     using std::find;
 
     return find(
-        begin(range),
-        end(range),
-        value);
+        begin(self),
+        end(self),
+        same(x));
 }
 
 template<
     typename Range,
     typename Value>
 auto contains(
-    Range &&range,
-    Value &&value)
+    Range &&self,
+    Value &&x)
 -> bool
 {
-    return end(range) == find(
-        range,
-        value);
+    return equal(
+        end(same(self)),
+        find(
+            self,
+            same(x)));
 }
 
 }
