@@ -6,19 +6,13 @@
 original (c) 2021 theodoric e. stier
 public domain
 
-in order to handle smart pointers,
-iterators, and dumb pointers generically,
-we occasionally convert uniformly to
-a dumb pointer. these are the default
-implementations for those customization
-points.
+turn smart pointers and dumb pointers
+into dumb pointers
 
 */
 
 #ifndef H_8B0BE2A5_D261_4AB8_AA1D_479DBE2D4F6C
 #define H_8B0BE2A5_D261_4AB8_AA1D_479DBE2D4F6C
-
-#include <ted/hyp.hpp>
 
 #include <ted/same.hpp>
 
@@ -44,7 +38,5 @@ template<
 }
 
 }
-
-#include <ted/nosame.hpp>
 
 #endif
