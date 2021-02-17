@@ -13,9 +13,8 @@ our favorite range.
 #ifndef H_8FCD914D_66A0_4425_9AB3_E94964376165
 #define H_8FCD914D_66A0_4425_9AB3_E94964376165
 
-#include <ted/operator.hpp>
-
 #include <ted/assuming.hpp>
+#include <ted/operator.hpp>
 #include <ted/same.hpp>
 
 namespace ted::span
@@ -77,8 +76,5 @@ template<
 }
 
 }
-
-#include <ted/nosame.hpp>
-#include <ted/noassuming.hpp>
 
 #endif

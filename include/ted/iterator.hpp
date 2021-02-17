@@ -17,14 +17,13 @@ different contexts.
 #ifndef H_8F9F2391_A5FE_4676_8C99_160E438FEC85
 #define H_8F9F2391_A5FE_4676_8C99_160E438FEC85
 
-#include <ted/address.hpp>
-#include <ted/is_truthy.hpp>
-#include <ted/operator.hpp>
-
 #include <ted/assuming.hpp>
+#include <ted/null.hpp>
+#include <ted/operator.hpp>
+#include <ted/pointer.hpp>
 #include <ted/same.hpp>
 
-namespace ted::iterator
+namespace ted
 {
 
 template<
@@ -56,15 +55,15 @@ template<
 	auto peek(
 		Caret &&caret)
 	noexcept -> decltype(
-		obj(
+		follow(
 			same(caret)))
 {
-	const auto non_null = is_truthy(
+	const auto non_null = is_nonnull(
 		caret);
 
 	assuming(non_null)
 	{
-		return obj(
+		return follow(
 			same(caret));
 	}
 }
@@ -82,8 +81,5 @@ template<
 }
 
 }
-
-#include <ted/nosame.hpp>
-#include <ted/noassuming.hpp>
 
 #endif

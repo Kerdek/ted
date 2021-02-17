@@ -42,10 +42,10 @@ optionally moved from when invoked.
 #ifndef H_C18F11C6_324A_42F5_925B_C0B3AE1A7BA0
 #define H_C18F11C6_324A_42F5_925B_C0B3AE1A7BA0
 
-#include <type_traits>
-
 #include <ted/assuming.hpp>
 #include <ted/same.hpp>
+
+#include <type_traits>
 
 namespace ted
 {
@@ -108,8 +108,5 @@ template<
 }
 
 }
-
-#include <ted/nosame.hpp>
-#include <ted/noassuming.hpp>
 
 #endif
