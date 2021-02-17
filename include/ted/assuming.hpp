@@ -7,14 +7,7 @@ original (c) 2021 theodoric e. stier
 public domain
 
 used for simultaneous debug asserting
-and runtime optimizing.
-
-CHORE NOTICE:
-
-this file must be included after all 
-others. before '#endif', you must:
-
-#include <ted/noassuming.hpp>
+and release optimizing.
 
 */
 
