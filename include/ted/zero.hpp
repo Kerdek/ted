@@ -5,6 +5,11 @@
 
 original (c) 2021 theodoric e. stier
 public domain
+
+zero checks should customize.
+don't just contextually convert things
+to 'bool'!
+
 */
 
 #ifndef H_EE342C3A_EB55_4B80_9A92_EE1B75243901
@@ -20,7 +25,9 @@ namespace ted
             T &&x)
         -> decltype(auto)
     {
-        return equal(x, 0);
+        return equal(
+            same(x),
+            0);
     }
 
     template<
@@ -29,7 +36,9 @@ namespace ted
             T &&x)
         -> decltype(auto)
     {
-        return unequal(x, 0);
+        return unequal(
+            same(x),
+            0);
     }
     
     template<
@@ -38,7 +47,9 @@ namespace ted
             T &&x)
         -> decltype(auto)
     {
-        return greater(x, 0);
+        return greater(
+            same(x),
+            0);
     }
 
     template<
@@ -47,7 +58,9 @@ namespace ted
             T &&x)
         -> decltype(auto)
     {
-        return less(x, 0);
+        return less(
+            same(x),
+            0);
     }
     
     template<
@@ -56,7 +69,9 @@ namespace ted
             T &&x)
         -> decltype(auto)
     {
-        return less_equal(x, 0);
+        return less_equal(
+            same(x),
+            0);
     }
 
     template<
@@ -65,7 +80,9 @@ namespace ted
             T &&x)
         -> decltype(auto)
     {
-        return greater_equal(x, 0);
+        return greater_equal(
+            same(x),
+            0);
     }
 }
 
