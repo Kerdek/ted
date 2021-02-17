@@ -17,229 +17,274 @@ unwrap the reference.
 #ifndef H_E3B5CD65_B490_4785_8EA1_50AB09F1CEB6
 #define H_E3B5CD65_B490_4785_8EA1_50AB09F1CEB6
 
-#include <ted/address.hpp>
-
-#include <atomic>
-#include <type_traits>
-
-#include <ted/same.hpp>
+#include <ted/ref.hpp>
+#include <ted/lift.hpp>
+#include <ted/memory_order.hpp>
+#include <ted/pointer.hpp>
 
 namespace ted
 {
 
-namespace memory_order
-{
+/**
 
-enum type
-{
-	relaxed = std::memory_order_relaxed,
-	acquire = std::memory_order_acquire,
-	release = std::memory_order_release,
-	acq_rel = std::memory_order_acq_rel,
-	seq_cst = std::memory_order_seq_cst
-};
+`atomic_invoke` on the `args` and return
+the result.
 
-}
+This function template controls the
+iterative instantiation of
+`atomic_invoke`. An atomic initiator or
+composed atomic operation should
+delegate to `atomic_result` to continue
+unwrapping the `AtomicObject`.
 
+*/
 template<
-	typename Self>
-	auto atomic_obj(
-		Self &&self)
-	noexcept -> auto *
-{
-	return ted::address(
-		self);
-}
-
-template<
-	typename Atomic>
-	auto load(
-		Atomic &&self,
-		memory_order::type order =
-			memory_order::seq_cst)
+	typename ...Args>
+	auto atomic_result(
+		Args &&...args)
 	noexcept -> decltype(auto)
 {
-	return obj(
-		atomic_load_explicit(
-			atomic_obj(
-				same(self)),
-			order));
+	return atomic_invoke(
+		same(args)...);
 }
 
+/**
+
+Get the result 
+
+*/
 template<
-	typename Atomic,
+	typename Object,
+	typename AtomicOp,
+	typename ...Args>
+	auto atomic_invoke(
+		std::atomic<Object> &object,
+		AtomicOp &&op,
+		Args &&...args)
+	noexcept -> decltype(auto)
+{
+	return invoke(
+		same(op),
+		ted::address_of(object),
+		same(args)...);
+}
+
+constexpr auto atomic_load = lift(
+	atomic_load_explicit);
+
+template<
+	typename AtomicObject>
+	auto load(
+		AtomicObject &&object)
+	noexcept -> decltype(
+		ted::atomic_result(
+			same(object),
+			atomic_load))
+{
+	return ted::atomic_result(
+		same(object),
+		atomic_load);
+}
+
+constexpr auto atomic_store = lift(
+	atomic_store_explicit);
+
+template<
+	typename AtomicObject,
 	typename Value>
 	auto store(
-		Atomic &&self,
-		Value new_val,
-		memory_order::type order =
-			memory_order::seq_cst)
-	noexcept -> decltype(auto)
+		AtomicObject &&object,
+		Value &&value)
+	noexcept -> decltype(
+		ted::atomic_result(
+			same(object),
+			atomic_store,
+			same(value)))
 {
-	return obj(
-		atomic_store_explicit(
-			atomic_obj(
-				same(self)),
-			new_val,
-			order));
+	return ted::atomic_result(
+		same(object),
+		atomic_store,
+		same(value));
 }
 
+constexpr auto atomic_exchange = lift(
+	atomic_exchange_explicit);
+
 template<
-	typename Atomic,
+	typename AtomicObject,
 	typename Value>
 	auto exchange(
-		Atomic &&self,
-		Value new_val,
-		memory_order::type order =
-			memory_order::seq_cst)
-	noexcept -> decltype(auto)
+		AtomicObject &&object,
+		Value &&value)
+	noexcept -> decltype(
+		ted::atomic_result(
+			same(object),
+			atomic_exchange,
+			same(value)))
 {
-	return obj(
-		atomic_exchange_explicit(
-			atomic_obj(
-				same(self)),
-			new_val,
-			order));
+	return ted::atomic_result(
+		same(object),
+		atomic_exchange,
+		same(value));
 }
 
+constexpr auto atomic_compare_exchange_strong = lift(
+	atomic_compare_exchange_strong_explicit);
+
 template<
-	typename Atomic,
-	typename Value>
+	typename AtomicObject,
+	typename Expected,
+	typename Desired>
 	auto compare_exchange_strong(
-		Atomic &&self,
-		Value &expected,
-		Value desired,
-		memory_order::type failure =
-			memory_order::seq_cst,
-		memory_order::type success =
-			memory_order::seq_cst)
-	noexcept -> decltype(auto)
+		AtomicObject &&object,
+		Expected &&expected,
+		Desired &&desired)
+	noexcept -> decltype(
+		ted::atomic_result(
+			same(object),
+			atomic_compare_exchange_strong,
+			same(expected),
+			same(desired)))
 {
-	return obj(
-		atomic_compare_exchange_strong_explicit(
-			atomic_obj(
-				same(self)),
-			addressof(expected),
-			desired,
-			success,
-			failure));
+	return ted::atomic_result(
+		same(object),
+		atomic_compare_exchange_strong,
+		same(expected),
+		same(desired));
 }
 
+constexpr auto atomic_compare_exchange_weak = lift(
+	atomic_compare_exchange_weak_explicit);
+
 template<
-	typename Atomic,
-	typename Value>
+	typename AtomicObject,
+	typename Expected,
+	typename Desired>
 	auto compare_exchange_weak(
-		Atomic &&self,
-		Value &expected,
-		Value desired,
-		memory_order::type failure =
-			memory_order::seq_cst,
-		memory_order::type success =
-			memory_order::seq_cst)
-	noexcept -> decltype(auto)
+		AtomicObject &&object,
+		Expected &&expected,
+		Desired &&desired)
+	noexcept -> decltype(
+		ted::atomic_result(
+			same(object),
+			atomic_compare_exchange_weak,
+			same(expected),
+			same(desired)))
 {
-	return obj(
-		atomic_compare_exchange_weak_explicit(
-			atomic_obj(
-				same(self)),
-			addressof(expected),
-			desired,
-			success,
-			failure));
+	return ted::atomic_result(
+		same(object),
+		atomic_compare_exchange_weak,
+		same(expected),
+		same(desired));
 }
 
+constexpr auto atomic_fetch_add = lift(
+	atomic_fetch_add_explicit);
+
 template<
-	typename Atomic,
-	typename Value>
+	typename AtomicObject,
+	typename Amount>
 	auto fetch_add(
-		Atomic &&self,
-		Value amount,
-		memory_order::type order =
-			memory_order::seq_cst)
-	noexcept -> decltype(auto)
+		AtomicObject &&object,
+		Amount &&amount)
+	noexcept -> decltype(
+		ted::atomic_result(
+			same(object),
+			atomic_fetch_add,
+			same(amount)))
 {
-	return obj(
-		atomic_fetch_add_explicit(
-			atomic_obj(
-				same(self)),
-			amount,
-			order));
+	return ted::atomic_result(
+		same(object),
+		atomic_fetch_add,
+		same(amount));
 };
 
+constexpr auto atomic_fetch_sub = lift(
+	atomic_fetch_sub_explicit);
+
 template<
-	typename Atomic,
-	typename Value>
+	typename AtomicObject,
+	typename Amount>
 	auto fetch_sub(
-		Atomic &&self,
-		Value amount,
-		memory_order::type order =
-			memory_order::seq_cst)
-	noexcept -> decltype(auto)
+		AtomicObject &&object,
+		Amount &&amount)
+	noexcept -> decltype(
+		ted::atomic_result(
+			same(object),
+			atomic_fetch_sub,
+			same(amount)))
 {
-	return obj(
-		atomic_fetch_sub_explicit(
-			atomic_obj(
-				same(self)),
-			amount,
-			order));
+	return ted::atomic_result(
+		same(object),
+		atomic_fetch_sub,
+		same(amount));
 }
 
+constexpr auto atomic_fetch_and = lift(
+	atomic_fetch_and_explicit);
+
 template<
-	typename Atomic,
-	typename Value>
+	typename AtomicObject,
+	typename Amount>
 	auto fetch_and(
-		Atomic &&self,
-		Value amount,
-		memory_order::type order =
-			memory_order::seq_cst)
-	noexcept -> decltype(auto)
+		AtomicObject &&object,
+		Amount &&amount)
+	noexcept -> decltype(
+		ted::atomic_result(
+			same(object),
+			atomic_fetch_and,
+			same(amount))
+	)
 {
-	return obj(
-		atomic_fetch_and_explicit(
-			atomic_obj(
-				same(self)),
-			amount,
-			order));
+	return ted::atomic_result(
+		same(object),
+		atomic_fetch_and,
+		same(amount));
 }
 
+constexpr auto atomic_fetch_or = lift(
+	atomic_fetch_or_explicit);
+
 template<
-	typename Atomic,
-	typename Value>
+	typename AtomicObject,
+	typename Amount>
 	auto fetch_or(
-		Atomic &&self,
-		Value amount,
-		memory_order::type order =
-			memory_order::seq_cst)
-	noexcept -> decltype(auto)
+		AtomicObject &&object,
+		Amount &&amount)
+	noexcept -> decltype(
+		ted::atomic_result(
+			same(object),
+			atomic_fetch_or,
+			same(amount))
+	)
 {
-	return obj(
-		atomic_fetch_or_explicit(
-			atomic_obj(
-				same(self)),
-			amount,
-			order));
+	return ted::atomic_result(
+		same(object),
+		atomic_fetch_or,
+		same(amount));
 }
+
+constexpr auto atomic_fetch_xor = lift(
+	atomic_fetch_xor_explicit);
 
 template<
-	typename Atomic,
-	typename Value>
+	typename AtomicObject,
+	typename Amount>
 	auto fetch_xor(
-		Atomic &&self,
-		Value amount,
-		memory_order::type order =
-			memory_order::seq_cst)
-	noexcept -> decltype(auto)
+		AtomicObject &&object,
+		Amount &&amount)
+	noexcept -> decltype(
+		ted::atomic_result(
+			same(object),
+			atomic_fetch_xor,
+			same(amount)))
 {
-	return obj(
-		atomic_fetch_xor_explicit(
-			atomic_obj(
-				same(self)),
-			amount,
-			order));
+	return ted::atomic_result(
+		same(object),
+		atomic_fetch_xor,
+		same(amount));
 }
 
 }
-
-#include <ted/nosame.hpp>
 
 #endif
