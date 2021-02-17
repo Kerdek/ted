@@ -56,57 +56,57 @@ template<
     auto initial_suspend()
     & -> decltype(auto)
     {
-        return initial_task(
+        return initial_operation(
             coroutine);
     }
 
     auto initial_suspend()
     && -> decltype(auto)
     {
-        return initial_task(
+        return initial_operation(
             same(coroutine));
     }
 
     auto initial_suspend()
     const & -> decltype(auto)
     {
-        return initial_task(
+        return initial_operation(
             coroutine);
     }
 
     auto initial_suspend()
     const && -> decltype(auto)
     {
-        return initial_task(
+        return initial_operation(
             same_const(coroutine));
     }
 
     auto final_suspend()
     & -> decltype(auto)
     {
-        return final_task(
+        return final_operation(
             coroutine);
     }
 
     auto final_suspend()
     && -> decltype(auto)
     {
-        return final_task(
+        return final_operation(
             same(coroutine));
     }
 
     auto final_suspend()
     const & -> decltype(auto)
     {
-        return final_task(
+        return final_operation(
             coroutine);
     }
 
     auto final_suspend()
     const && -> decltype(auto)
     {
-        return until(final_task(
-            same_const(coroutine)));
+        return final_operation(
+            same_const(coroutine));
     }
 
     auto return_void()
