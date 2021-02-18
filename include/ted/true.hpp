@@ -16,6 +16,7 @@ to 'bool'!
 #define H_B05A95C9_4F53_4789_B523_4CEDDD640ECE
 
 #include <ted/same.hpp>
+#include <ted/operator.hpp>
 
 namespace ted
 {
