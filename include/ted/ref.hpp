@@ -1,8 +1,8 @@
 /* 
                ref_obj.hpp
-               
+
         -- reference wrappers --
-   
+
 original (c) 2021 theodoric e. stier
 public domain
 
@@ -43,68 +43,99 @@ optionally moved from when invoked.
 #define H_C18F11C6_324A_42F5_925B_C0B3AE1A7BA0
 
 #include <ted/assuming.hpp>
-#include <ted/same.hpp>
+#include <ted/iterator.hpp>
+#include <ted/null.hpp>
 
 #include <type_traits>
 
 namespace ted
 {
 
+/**
+Default implementation of `obj` which
+simply returns the argument.
+*/
 template<
-    typename T>
-    struct ref_obj
-{
-    std::remove_reference_t<T> *x;
-};
-
-template<
-    typename T>
+    typename Object>
     auto obj(
-        T &&x)
-    noexcept -> T
+        Object x)
+    noexcept -> Object
 {
     return same(x);
 }
 
+/**
+Stores a pointer and provides good
+idioms for reference-semantic
+subobjects.
+*/
 template<
-    typename T>
+    typename Reference>
+    struct ref_obj
+{
+    using pointer_t = 
+        std::remove_reference_t<
+            Reference> *;
+
+    pointer_t pointer;
+};
+
+/**
+Unwrap the `ref_obj`.
+*/
+template<
+    typename Reference>
     auto obj(
-        ref_obj<T> r)
-    noexcept -> T
+        ref_obj<Reference> object)
+    noexcept -> Reference
 {
-    assuming(r.x)
-    {
-        return static_cast<T>(*r.x);
-    }
+    return static_cast<Reference>(
+        ted::peek(same(object).pointer));
 }
 
+/**
+Wrap `object` in a `ref_obj`.
+*/
 template<
-    typename T>
+    typename Object>
     auto ref(
-        T &&x)
-    noexcept -> ref_obj<T &&>
+        Object &&object)
+    noexcept -> ref_obj<
+        Object &&>
 {
-    return { &x };
+    return { &object };
 }
 
+/**
+Obtain a `ref_obj` of a related type.
+*/
 template<
-    typename U,
-    typename T>
+    typename Destination,
+    typename Source>
     auto static_ref_cast(
-        ref_obj<T> r)
-    noexcept -> ref_obj<U>
+        ref_obj<Source> r)
+    noexcept -> ref_obj<
+        Destination>
 {
-    return ref(static_cast<U&>(obj(r)));
+    return ref(
+        static_cast<Destination &>(
+            obj(r)));
 }
 
+/**
+Obtain a `ref_obj` of a related type
+with dynamic type checking.
+*/
 template<
-    typename U,
-    typename T>
+    typename Destination,
+    typename Source>
     auto dynamic_ref_cast(
-        ref_obj<T> r)
-    -> ref_obj<U>
+        ref_obj<Source> r)
+    -> ref_obj<Destination>
 {
-    return ref(dynamic_cast<U&>(obj(r)));
+    return ref(
+        dynamic_cast<Destination &>(
+            obj(r)));
 }
 
 }
