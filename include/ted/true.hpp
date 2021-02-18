@@ -22,24 +22,30 @@ namespace ted
 {
 
 template<
-	typename Self>
+	typename Object>
 	auto is_truthy(
-		Self &&self)
-	-> decltype(auto)
+		Object &&object)
+	-> decltype(
+		equal(
+			same(object),
+			true))
 {
 	return equal(
-		same(self),
+		same(object),
 		true);
 }
 
 template<
-	typename Self>
+	typename Object>
 	auto is_falsy(
-		Self &&self)
-	-> decltype(auto)
+		Object &&object)
+	-> decltype(
+		equal(
+			same(object),
+			false))
 {
 	return equal(
-		same(self),
+		same(object),
 		false);
 }
 
