@@ -37,22 +37,25 @@ template<
 }
 
 template<
-	range Range>
+	range Range,
+	typename Object>
 	auto insert(
-		Range &&ab)
+		Range &&ab,
+		Object &&object)
 	noexcept -> decltype(auto)
 {
 	return insert(
-		end(same(ab)));
+		end(same(ab)),
+		same(object));
 }
 
 template<
 	range Range>
-	auto insert_front(
+	auto insert_reverse(
 		Range &&ab)
 	noexcept -> decltype(auto)
 {
-	return insert(
+	return insert_reverse(
 		begin(same(ab)));
 }
 
@@ -68,11 +71,11 @@ template<
 
 template<
 	range Range>
-	auto extract_back(
+	auto extract_reverse(
 		Range &&ab)
 	noexcept -> decltype(auto)
 {
-	return extract(
+	return extract_reverse(
 		begin(same(ab)));
 }
 

@@ -76,15 +76,16 @@ infix_alias(greater_equal, >=)
 
 #undef infix_alias
 
-#define prefix_alias(name, op)          \
-template<                               \
-    typename Operand>                   \
-    constexpr auto name(                \
-        Operand &&operand)              \
-    -> decltype(op same(operand))       \
-{                                       \
-    return op same(operand);            \
-}                                       \
+#define prefix_alias(name, op)         \
+template<                              \
+    typename Object>                   \
+    constexpr auto name(               \
+        Object &&object)               \
+    -> decltype(                       \
+        op same(object))               \
+{                                      \
+    return op same(object);            \
+}                                      \
 
 prefix_alias(plus, +)
 prefix_alias(minus, -)
@@ -97,52 +98,70 @@ prefix_alias(pre_decrement, --)
 
 #undef prefix_alias
 
+/**
+Post-increment `object`.
+*/
 template<
-    typename Operand>
+    typename Object>
     constexpr auto increment(
-        Operand &&operand)
-    -> decltype(same(operand)++)
+        Object &&object)
+    -> decltype(
+        same(object)++)
 {
-    return same(operand)++;
+    return same(object)++;
 }
 
+/**
+Post-decrement `object`.
+*/
 template<
-    typename Operand>
+    typename Object>
     constexpr auto decrement(
-        Operand &&operand)
-    -> decltype(same(operand)--)
+        Object &&object)
+    -> decltype(
+        same(object)--)
 {
-    return same(operand)--;
+    return same(object)--;
 }
 
+/**
+Subscript `object` with `index`.
+*/
 template<
-    typename Self,
+    typename Object,
     typename Index>
     constexpr auto subscript(
-        Self &&self,
-        Index &&i)
+        Object &&object,
+        Index &&index)
     -> decltype(
-        same(self)[
-            same(i)])
+        same(object)[
+            same(index)])
 {
-    return same(self)[
-        same(i)];
+    return same(object)[
+        same(index)];
 }
 
+/**
+Invoke `object` with `args`.
+*/
 template<
-    typename Self,
+    typename Object,
     typename ...Args>
     constexpr auto invoke(
-        Self &&self,
+        Object &&object,
         Args &&...args)
     -> decltype(
-        same(self)(
+        same(object)(
             same(args)...))
 {
-    return same(self)(
+    return same(object)(
         same(args)...);
 }
 
+/**
+Default-initialize an `Object` at
+`address`.
+*/
 template<
     typename Object>
     constexpr auto non_allocating_new_default(
@@ -152,6 +171,10 @@ template<
     return new (address) Object;
 }
 
+/**
+Direct-initialize an `Object` at
+`address`.
+*/
 template<
     typename Object,
     typename ...Args>
@@ -164,6 +187,10 @@ template<
         same(args)...);
 }
 
+/**
+Direct-list-initialize an `Object` at
+`address`.
+*/
 template<
     typename Object,
     typename ...Args>
@@ -176,6 +203,9 @@ template<
         same(args)... };
 }
 
+/**
+Destroy `object`.
+*/
 template<
     typename Object>
     constexpr auto destroy(

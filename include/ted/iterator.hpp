@@ -61,8 +61,84 @@ template<
 		Iterator &&it)
 	noexcept -> decltype(auto)
 {
-	return increment(
+	increment(
 		same(it));
+}
+
+/*
+Stream extraction adapter for iterators.
+*/
+template<
+	typename Iterator>
+	auto extract(
+		Iterator &&it)
+	noexcept -> decltype(
+		ted::peek(
+			increment(
+				same(it))))
+{
+	return ted::peek(
+		increment(
+			same(it)));
+}
+
+/*
+Stream extraction adapter for iterators.
+*/
+template<
+	typename Iterator>
+	auto extract_reverse(
+		Iterator &&it)
+	noexcept -> decltype(
+		ted::peek(
+			decrement(
+				same(it))))
+{
+	return ted::peek(
+		decrement(
+			same(it)));
+}
+
+/*
+Stream insertion adapter for iterators.
+*/
+template<
+	typename Iterator,
+	typename Object>
+	auto insert(
+		Iterator &&it,
+		Object &&object)
+	noexcept -> decltype(
+		ted::peek(
+			increment(
+				same(it))))
+{
+	return assign(
+		ted::peek(
+			increment(
+				same(it))),
+		same(object));
+}
+
+/*
+Stream insertion adapter for iterators.
+*/
+template<
+	typename Iterator,
+	typename Object>
+	auto insert_reverse(
+		Iterator &&it,
+		Object &&object)
+	noexcept -> decltype(
+		ted::peek(
+			decrement(
+				same(it))))
+{
+	return assign(
+		ted::peek(
+			decrement(
+				same(it))),
+		same(object));
 }
 
 }
