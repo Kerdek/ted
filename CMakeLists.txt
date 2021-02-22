@@ -48,10 +48,6 @@ foreach(TED_HEADER ${TED_SKEL_HEADERS})
         DEPENDS
             "${CMAKE_CURRENT_SOURCE_DIR}/include/${TED_HEADER}")
 
-    target_sources(ted_all_headers
-        INTERFACE
-            "${CMAKE_CURRENT_BINARY_DIR}/include/${TED_HEADER}")
-
     #
     # Support including all headers together.
     #
@@ -59,6 +55,14 @@ foreach(TED_HEADER ${TED_SKEL_HEADERS})
         APPEND
         "${TED_ALL_HEADERS_HEADER}"
         "#include<${TED_HEADER}>\n")
+
+    string(REPLACE "/" "" TED_HEADER_TARGET "${TED_HEADER}")
+    add_custom_target(
+        "ted_header_${TED_HEADER_TARGET}"
+        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/include/${TED_HEADER}")
+
+    add_dependencies(ted_all_headers "ted_header_${TED_HEADER_TARGET}")
+
 endforeach()
 
 add_library (ted INTERFACE)
