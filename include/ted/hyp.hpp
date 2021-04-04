@@ -18,39 +18,6 @@ for decltype expressions.
 
 #include <type_traits>
 
-namespace ted
-{
-    template<
-        typename T>
-        auto hyp()
-        noexcept -> T
-    {
-        return static_cast<T>(*static_cast<std::remove_reference_t<T> *>(nullptr));
-    }
-    
-    template<
-        typename T>
-        auto hyp_pr(const T &)
-        noexcept -> T
-    {
-        return *static_cast<T *>(nullptr);
-    }
-    
-    template<
-        typename T>
-        auto hyp_l(const T &)
-        noexcept -> T &
-    {
-        return *static_cast<T *>(nullptr);
-    }
-    
-    template<
-        typename T>
-        auto hyp_x(const T &)
-        noexcept -> T &&
-    {
-        return static_cast<T &&>(*static_cast<T *>(nullptr));
-    }
-}
+#define hyp(T) (static_cast<T>(*static_cast<std::remove_reference_t<T> *>(nullptr)))
 
 #endif
