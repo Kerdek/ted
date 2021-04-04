@@ -15,7 +15,6 @@ to 'bool'!
 #ifndef H_B05A95C9_4F53_4789_B523_4CEDDD640ECE
 #define H_B05A95C9_4F53_4789_B523_4CEDDD640ECE
 
-#include <ted/same.hpp>
 #include <ted/operator.hpp>
 
 namespace ted
@@ -30,6 +29,8 @@ template<
 			same(object),
 			true))
 {
+	using ted::equal;
+
 	return equal(
 		same(object),
 		true);
@@ -44,6 +45,8 @@ template<
 			same(object),
 			false))
 {
+	using ted::equal;
+
 	return equal(
 		same(object),
 		false);
