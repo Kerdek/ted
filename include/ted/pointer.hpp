@@ -48,7 +48,7 @@ template<
     noexcept -> decltype(
         *x)
 {
-    static_assert(std::is_pointer_v<T>);
+    static_assert(std::is_pointer_v<std::remove_reference_t<T>>);
 
     return *x;
 }
