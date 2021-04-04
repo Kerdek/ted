@@ -1,3 +1,16 @@
+/*
+              exchange.hpp
+
+     -- non-atomic doppelgangers --
+
+original (c) 2021 theodoric e. stier
+public domain
+
+some algorithms need to work with
+both atomic and non-atomic objects.
+
+*/
+
 #ifndef H_DF59A944_C040_4B86_B1A4_3546C94AC874
 #define H_DF59A944_C040_4B86_B1A4_3546C94AC874
 
@@ -8,44 +21,60 @@
 namespace ted
 {
 
+/**
+return the value of `x`.
+*/
 template<
-    typename Object,
-    typename Value>
-    auto load(
-        Object &&object)
-    noexcept -> decltype(auto)
+    typename Object>
+auto load(
+    Object &&x)
+noexcept -> auto
 {
-    return same(object);
+    return same(x);
 }
 
+/**
+assign `x` with `y`.
+return `x`.
+*/
 template<
     typename Object,
     typename Value>
-    auto store(
-        Object &&object,
-        Value &&value)
-    noexcept -> decltype(auto)
+auto store(
+    Object &&x,
+    Value &&y)
+noexcept -> decltype(auto)
 {
     return assign(
-        same(object),
-        same(value));
+        same(x),
+        same(y));
 }
 
+/**
+assign `x` with `y`.
+return the old value of `x`.
+
+if `x` is an lvalue, the value is
+copied.
+if `x` is an rvalue, the value is moved.
+*/
 template<
     typename Object,
     typename Value>
-    auto exchange(
-        Object &&object,
-        Value &&value)
-    noexcept -> decltype(auto)
+auto exchange(
+    Object &&x,
+    Value &&y)
+noexcept -> auto
 {
-    auto result = std::move(object);
+    auto z =
+        same(x);
 
+    using ted::assign;
     assign(
-        object, 
-        same(value));
+        x, 
+        same(y));
 
-    return same(result);
+    return same(z);
 }
 
 }
