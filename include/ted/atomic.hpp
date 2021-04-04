@@ -34,8 +34,9 @@ This function template controls the
 iterative instantiation of
 `atomic_invoke`. An atomic initiator or
 composed atomic operation should
-delegate to `atomic_result` to continue
-unwrapping the `AtomicObject`.
+delegate to this function template
+to continue unwrapping the
+`AtomicObject`.
 
 */
 template<
@@ -48,11 +49,6 @@ template<
 		same(args)...);
 }
 
-/**
-
-Get the result 
-
-*/
 template<
 	typename Object,
 	typename AtomicOp,
@@ -69,25 +65,16 @@ template<
 		same(args)...);
 }
 
-constexpr auto atomic_load = lift(
-	atomic_load_explicit);
-
 template<
 	typename AtomicObject>
 	auto load(
 		AtomicObject &&object)
-	noexcept -> decltype(
-		ted::atomic_result(
-			same(object),
-			atomic_load))
+	noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
 		same(object),
-		atomic_load);
+		lift(atomic_load_explicit));
 }
-
-constexpr auto atomic_store = lift(
-	atomic_store_explicit);
 
 template<
 	typename AtomicObject,
@@ -95,20 +82,13 @@ template<
 	auto store(
 		AtomicObject &&object,
 		Value &&value)
-	noexcept -> decltype(
-		ted::atomic_result(
-			same(object),
-			atomic_store,
-			same(value)))
+	noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
 		same(object),
-		atomic_store,
+		lift(atomic_store_explicit),
 		same(value));
 }
-
-constexpr auto atomic_exchange = lift(
-	atomic_exchange_explicit);
 
 template<
 	typename AtomicObject,
@@ -116,20 +96,13 @@ template<
 	auto exchange(
 		AtomicObject &&object,
 		Value &&value)
-	noexcept -> decltype(
-		ted::atomic_result(
-			same(object),
-			atomic_exchange,
-			same(value)))
+	noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
 		same(object),
-		atomic_exchange,
+		lift(atomic_exchange_explicit),
 		same(value));
 }
-
-constexpr auto atomic_compare_exchange_strong = lift(
-	atomic_compare_exchange_strong_explicit);
 
 template<
 	typename AtomicObject,
@@ -139,22 +112,14 @@ template<
 		AtomicObject &&object,
 		Expected &&expected,
 		Desired &&desired)
-	noexcept -> decltype(
-		ted::atomic_result(
-			same(object),
-			atomic_compare_exchange_strong,
-			same(expected),
-			same(desired)))
+	noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
 		same(object),
-		atomic_compare_exchange_strong,
+		lift(atomic_compare_exchange_strong_explicit),
 		same(expected),
 		same(desired));
 }
-
-constexpr auto atomic_compare_exchange_weak = lift(
-	atomic_compare_exchange_weak_explicit);
 
 template<
 	typename AtomicObject,
@@ -164,22 +129,14 @@ template<
 		AtomicObject &&object,
 		Expected &&expected,
 		Desired &&desired)
-	noexcept -> decltype(
-		ted::atomic_result(
-			same(object),
-			atomic_compare_exchange_weak,
-			same(expected),
-			same(desired)))
+	noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
 		same(object),
-		atomic_compare_exchange_weak,
+		lift(atomic_compare_exchange_weak_explicit),
 		same(expected),
 		same(desired));
 }
-
-constexpr auto atomic_fetch_add = lift(
-	atomic_fetch_add_explicit);
 
 template<
 	typename AtomicObject,
@@ -187,20 +144,13 @@ template<
 	auto fetch_add(
 		AtomicObject &&object,
 		Amount &&amount)
-	noexcept -> decltype(
-		ted::atomic_result(
-			same(object),
-			atomic_fetch_add,
-			same(amount)))
+	noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
 		same(object),
-		atomic_fetch_add,
+		lift(atomic_fetch_add_explicit),
 		same(amount));
 };
-
-constexpr auto atomic_fetch_sub = lift(
-	atomic_fetch_sub_explicit);
 
 template<
 	typename AtomicObject,
@@ -208,20 +158,13 @@ template<
 	auto fetch_sub(
 		AtomicObject &&object,
 		Amount &&amount)
-	noexcept -> decltype(
-		ted::atomic_result(
-			same(object),
-			atomic_fetch_sub,
-			same(amount)))
+	noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
 		same(object),
-		atomic_fetch_sub,
+		lift(atomic_fetch_sub_explicit),
 		same(amount));
 }
-
-constexpr auto atomic_fetch_and = lift(
-	atomic_fetch_and_explicit);
 
 template<
 	typename AtomicObject,
@@ -229,21 +172,13 @@ template<
 	auto fetch_and(
 		AtomicObject &&object,
 		Amount &&amount)
-	noexcept -> decltype(
-		ted::atomic_result(
-			same(object),
-			atomic_fetch_and,
-			same(amount))
-	)
+	noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
 		same(object),
-		atomic_fetch_and,
+		lift(atomic_fetch_and_explicit),
 		same(amount));
 }
-
-constexpr auto atomic_fetch_or = lift(
-	atomic_fetch_or_explicit);
 
 template<
 	typename AtomicObject,
@@ -251,21 +186,13 @@ template<
 	auto fetch_or(
 		AtomicObject &&object,
 		Amount &&amount)
-	noexcept -> decltype(
-		ted::atomic_result(
-			same(object),
-			atomic_fetch_or,
-			same(amount))
-	)
+	noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
 		same(object),
-		atomic_fetch_or,
+		lift(atomic_fetch_or_explicit),
 		same(amount));
 }
-
-constexpr auto atomic_fetch_xor = lift(
-	atomic_fetch_xor_explicit);
 
 template<
 	typename AtomicObject,
@@ -273,15 +200,11 @@ template<
 	auto fetch_xor(
 		AtomicObject &&object,
 		Amount &&amount)
-	noexcept -> decltype(
-		ted::atomic_result(
-			same(object),
-			atomic_fetch_xor,
-			same(amount)))
+	noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
 		same(object),
-		atomic_fetch_xor,
+		lift(atomic_fetch_xor_explicit),
 		same(amount));
 }
 
