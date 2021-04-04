@@ -70,7 +70,12 @@ add_library (ted INTERFACE)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(ted
         INTERFACE
+            "-stdlib=libc++"
             "-fcoroutines-ts")
+    target_link_options(ted
+        INTERFACE
+            "-stdlib=libc++"
+            "LINKER:-lc++abi")
 
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(ted
