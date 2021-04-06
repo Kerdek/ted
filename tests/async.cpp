@@ -8,6 +8,8 @@
 
 #include <doctest/doctest.h>
 
+#include <experimental/coroutine>
+
 using namespace ted;
 using namespace ted::async;
 
