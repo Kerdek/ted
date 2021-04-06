@@ -1,9 +1,9 @@
-#include <memory>
 #include <ted/dyn.hpp>
 
 #include <doctest/doctest.h>
 
 #include <utility>
+#include <memory>
 
 using namespace ted;
 
