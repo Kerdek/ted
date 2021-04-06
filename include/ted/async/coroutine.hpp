@@ -21,8 +21,8 @@ namespace ted::async
 {
 
 template<
-    coro Coroutine>
-    struct coroutine
+    typename Coroutine>
+struct coroutine
 {
     using promise_type = promise<
         Coroutine>;

@@ -24,12 +24,12 @@ namespace ted
 /**
 
 default-initialize `object` in
-empty storage.
+uninitialized storage.
 
 */
 template<
     typename Object>
-    auto emplace_default(
+    auto initialize_default(
         Object &object)
     -> Object &
 {
@@ -41,13 +41,13 @@ template<
 /**
 
 direct-initialize `object` in
-empty storage with `args`.
+uninitialized storage with `args`
 
 */
 template<
     typename Object,
     typename ...Args>
-    auto emplace(
+    auto initialize(
         Object &object,
         Args &&...args)
     -> Object &
@@ -61,13 +61,13 @@ template<
 /**
 
 list-initialize `object` in
-empty storage with `args`.
+uninitialized storage with `args`.
 
 */
 template<
     typename Object,
     typename ...Args>
-    auto emplace_list(
+    auto initialize_list(
         Object &object,
         Args &&...args)
     -> Object &
@@ -86,7 +86,7 @@ then destroy `object`.
 */
 template<
     typename Object>
-    auto extract(
+    auto move_destroy(
         Object &object)
     noexcept -> Object
 {

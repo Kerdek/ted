@@ -10,13 +10,10 @@ public domain
 #ifndef H_526586BE_63E0_455A_875D_B7EA34B8AA99
 #define H_526586BE_63E0_455A_875D_B7EA34B8AA99
 
-#include <ted/operator.hpp>
+#include <ted/assuming.hpp>
 #include <ted/zero.hpp>
 
 #include <type_traits>
-
-#include <ted/assuming.hpp>
-#include <ted/same.hpp>
 
 namespace ted
 {
@@ -85,7 +82,8 @@ template<
 {
     return invoke(
         same(f),
-        invoke(same(g)));
+        invoke(
+            same(g)));
 }
 
 template<
@@ -103,14 +101,9 @@ template<
         fuzz(f, g); 
     };
 
-    repeat_n(
-        h,
-        n);
+    repeat_n(h, n);
 }
 
 }
-
-#include <ted/noassuming.hpp>
-#include <ted/nosame.hpp>
 
 #endif

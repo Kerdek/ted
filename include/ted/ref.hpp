@@ -1,115 +1,136 @@
 /* 
-               ref_obj.hpp
-               
+                ref.hpp
+
         -- reference wrappers --
-   
+
 original (c) 2021 theodoric e. stier
 public domain
 
 unfortunate events in the vintage of
-c++ render the necessity of a 
-separate non-pointer facility for
-expressing reference semantics in 
-contexts where lvalue-ness does not 
-map onto the problem.
-call 'ref' with a 'E' to get
-a 'ref_obj<T>' around the operand.
-for lvalue operands, T = E &
-for rvalue operands, T = E &&
-call 'obj' with a 'ref_obj<T>'
-to refer to the object. the value
-category is conserved.
-for generic contexts, 'obj' defaults
-to the value identity function.
-this is important for decoupling a 
-couple of important pieces of
-information about how the user wants
-our lib to store and use things:
+c++ render necessary a separate
+non-pointer facility for expressing
+reference semantics for problems onto
+which value category alone does not map.
 
-1) should we store a value or a 
-   reference?
-2) should we initialize with lvalue
-   or rvalue?
+call 'ref' to make a reference wrapper
+object referring to the operand.
 
-boost.asio fucks this up by not 
-letting us copy to a handler stored
-by value or explain that a handler
-should be stored by reference and
-optionally moved from when invoked.
+call 'obj' to refer to the object. the
+value category is conserved. for generic
+contexts, 'obj' defaults to the value-
+identity function.
+
+this allows the user to answer the
+following questions independently
+when passing arguments to a function
+which will store them:
+
+1) do we store the object or a pointer?
+2) can we move from the operand?
+
+boost.asio fucks this up by refusing
+to copy to a handler stored by value or
+explain that a handler should be stored
+by reference and optionally moved from
+when invoked.
 
 */
 
 #ifndef H_C18F11C6_324A_42F5_925B_C0B3AE1A7BA0
 #define H_C18F11C6_324A_42F5_925B_C0B3AE1A7BA0
 
-#include <type_traits>
+#include <ted/iterator.hpp>
 
-#include <ted/assuming.hpp>
-#include <ted/same.hpp>
+#include <type_traits>
 
 namespace ted
 {
 
+/**
+return the argument.
+*/
 template<
-    typename T>
-    struct ref_obj
-{
-    std::remove_reference_t<T> *x;
-};
-
-template<
-    typename T>
-    auto obj(
-        T &&x)
-    noexcept -> T
+    typename Object>
+auto obj(
+    Object x)
+noexcept -> Object
 {
     return same(x);
 }
 
+/**
+reference wrapper for use with
+containers and boxes.
+*/
 template<
-    typename T>
-    auto obj(
-        ref_obj<T> r)
-    noexcept -> T
+    typename Reference>
+    struct ref_obj
 {
-    assuming(r.x)
-    {
-        return static_cast<T>(*r.x);
-    }
-}
+    using pointer_t =
+        std::add_pointer_t<
+            std::remove_reference_t<
+                Reference>>;
 
+    pointer_t pointer;
+};
+
+/**
+unwrap a reference wrapper.
+*/
 template<
-    typename T>
-    auto ref(
-        T &&x)
-    noexcept -> ref_obj<T &&>
+    typename Reference>
+auto obj(
+    ref_obj<Reference> object)
+noexcept -> Reference
 {
-    return { &x };
+    return static_cast<Reference>(
+        ted::peek(same(object).pointer));
 }
 
+/**
+wrap a reference.
+*/
 template<
-    typename U,
-    typename T>
-    auto static_ref_cast(
-        ref_obj<T> r)
-    noexcept -> ref_obj<U>
+    typename Object>
+auto ref(
+    Object &&object)
+noexcept -> ref_obj<
+    Object &&>
 {
-    return ref(static_cast<U&>(obj(r)));
+    return { &object };
 }
 
+/**
+static cast a reference wrapper.
+*/
 template<
-    typename U,
-    typename T>
-    auto dynamic_ref_cast(
-        ref_obj<T> r)
-    -> ref_obj<U>
+    typename Destination,
+    typename Source>
+auto static_ref_cast(
+    ref_obj<Source> r)
+noexcept -> ref_obj<
+    Destination>
 {
-    return ref(dynamic_cast<U&>(obj(r)));
+    return ref(
+        static_cast<Destination &>(
+            obj(r)));
+}
+
+/**
+dynamic cast a reference wrapper.
+*/
+template<
+    typename Destination,
+    typename Source>
+auto dynamic_ref_cast(
+    ref_obj<Source> r)
+-> ref_obj<Destination>
+{
+    return ref(
+        dynamic_cast<Destination &>(
+            obj(r)));
 }
 
 }
-
-#include <ted/nosame.hpp>
-#include <ted/noassuming.hpp>
 
 #endif

@@ -20,131 +20,106 @@ using unqualified 'obj'
 #define H_9DA38D24_556B_4030_A811_83A582F37C2E
 
 #include <ted/ref.hpp>
+#include <ted/memfn.hpp>
 
-#include <coroutine>
+#ifdef __clang__
+#include <experimental/coroutine>
+#endif
 
 namespace ted::async
 {
 
 template<
-    typename Resume,
-    typename Operation>
-concept operation = requires (
-    Operation self,
-    Resume r)
+    typename T>
+concept operation =
+    requires (T x)
 {
-    static_cast<bool>(done(self));
-    then(self, r);
-    result(same(self));
+    done(x);
+    result(same(x));
 };
 
 template<
-    typename Resume,
-    operation<Resume> Task>
+    typename T>
+concept nothrow_result =
+    requires (T x)
+{
+    { result(same(x)) } noexcept;
+};
+
+template<
+    typename T>
+concept nothrow_operation =
+    operation<T> &&
+    nothrow_result<T>;
+
+template<
+    operation Task>
 struct awaitable_t
 {
     Task task;
 
-    auto await_ready()
-    & -> decltype(auto)
-    {
-        return done(
-            obj(task));
-    }
+    memfn(
+        auto await_ready(),
+        noexcept -> decltype(auto),
+        done, task)
 
-    auto await_ready()
-    && -> decltype(auto)
-    {
-        return done(
-            obj(same(task)));
-    }
+    memfn(
+        template<
+            typename Continuation>
+        auto await_suspend(
+            Continuation &&f),
+        -> decltype(auto),
+        then, task, same(f))
 
-    auto await_ready()
-    const & -> decltype(auto)
-    {
-        return done(
-            obj(task));
-    }
-
-    auto await_ready()
-    const && -> decltype(auto)
-    {
-        return done(
-            obj(same_const(task)));
-    }
-
-    auto await_suspend(
-        Resume &&resume)
-    & -> decltype(auto)
-    {
-        return then(
-            obj(task),
-            same(resume));
-    }
-
-    auto await_suspend(
-        Resume &&resume)
-    && -> decltype(auto)
-    {
-        return then(
-            obj(same(task)),
-            same(resume));
-    }
-
-    auto await_suspend(
-        Resume &&resume)
-    const & -> decltype(auto)
-    {
-        return then(
-            obj(task),
-            same(resume));
-    }
-
-    auto await_suspend(
-        Resume &&resume)
-    const && -> decltype(auto)
-    {
-        return then(
-            obj(same_const(task)),
-            same(resume));
-    }
-
-    auto await_resume()
-    & -> decltype(auto)
-    {
-        return result(
-            obj(task));
-    }
-
-    auto await_resume()
-    && -> decltype(auto)
-    {
-        return result(
-            obj(same(task)));
-    }
-    auto await_resume()
-    const & -> decltype(auto)
-    {
-        return result(
-            obj(task));
-    }
-    auto await_resume()
-    const && -> decltype(auto)
-    {
-        return result(
-            obj(same_const(task)));
-    }
+    memfn(
+        auto await_resume(),
+        -> decltype(auto),
+        result, task)
 };
 
 template<
-    typename Resume,
-    operation<Resume> Operation>
-    auto operator co_await(
-        Operation &&operation)
-    noexcept -> awaitable_t<
-        Resume,
-        std::remove_reference_t<
-            Operation>>
+    nothrow_operation Task>
+struct nothrow_awaitable_t
+{
+    Task task;
+
+    memfn(
+        auto await_ready(),
+        noexcept -> decltype(auto),
+        done, task)
+
+    memfn(
+        template<
+            typename Continuation>
+        auto await_suspend(
+            Continuation &&f),
+        noexcept -> decltype(auto),
+        then, task, same(f))
+
+    memfn(
+        auto await_resume(),
+        noexcept -> decltype(auto),
+        result, task)
+};
+
+template<
+    operation Operation>
+auto operator co_await(
+    Operation &&operation)
+noexcept -> awaitable_t<
+    std::remove_reference_t<
+        Operation>>
+{
+    return { same(operation) };
+}
+
+template<
+    nothrow_operation Operation>
+auto operator co_await(
+    Operation &&operation)
+noexcept -> nothrow_awaitable_t<
+    std::remove_reference_t<
+        Operation>>
 {
     return { same(operation) };
 }

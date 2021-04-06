@@ -1,7 +1,7 @@
 /*
               iterator.hpp
 
-      -- iterator manipulators --
+       -- iterator operations --
 
 original (c) 2021 theodoric e. stier
 public domain
@@ -12,78 +12,135 @@ when manipulating iterators so that they
 can be differently customized for 
 different contexts.
 
+automatically unwraps reference
+wrappers with 'obj'.
+
 */
 
 #ifndef H_8F9F2391_A5FE_4676_8C99_160E438FEC85
 #define H_8F9F2391_A5FE_4676_8C99_160E438FEC85
 
-#include <ted/address.hpp>
-#include <ted/is_truthy.hpp>
-#include <ted/operator.hpp>
-
 #include <ted/assuming.hpp>
-#include <ted/same.hpp>
+#include <ted/null.hpp>
 
-namespace ted::iterator
+namespace ted
 {
 
 template<
-	typename Begin,
-	typename Caret>
+	typename Lhs,
+	typename Rhs>
 	auto distance(
-		Begin &&begin,
-		Caret &&caret)
-	noexcept -> decltype(
-		minus(
-			same(caret), 
-			same(begin)))
+		Lhs &&a,
+		Rhs &&b)
+	noexcept -> decltype(auto)
 {
-	const auto ordered = negate(
-		less(
-			caret,
-			begin));
-
-	assuming(ordered)
+	assuming(less_equal(a, b))
 	{
 		return minus(
-			same(caret),
-			same(begin));
+			same(b),
+			same(a));
 	}
 }
 
 template<
-	typename Caret>
+	typename Iterator>
 	auto peek(
-		Caret &&caret)
-	noexcept -> decltype(
-		obj(
-			same(caret)))
+		Iterator &&it)
+	noexcept -> decltype(auto)
 {
-	const auto non_null = is_truthy(
-		caret);
-
-	assuming(non_null)
+	assuming(is_nonnull(it))
 	{
-		return obj(
-			same(caret));
+		return follow(
+			same(it));
 	}
 }
 
 template<
-	typename Caret>
+	typename Iterator>
 	auto advance(
-		Caret &&caret)
-	noexcept -> decltype(
-		increment(
-			same(caret)))
+		Iterator &&it)
+	noexcept -> decltype(auto)
 {
-	return increment(
-		same(caret));
+	increment(
+		same(it));
+}
+
+/*
+Stream extraction adapter for iterators.
+*/
+template<
+	typename Iterator>
+	auto extract(
+		Iterator &&it)
+	noexcept -> decltype(
+		ted::peek(
+			increment(
+				same(it))))
+{
+	return ted::peek(
+		increment(
+			same(it)));
+}
+
+/*
+Stream extraction adapter for iterators.
+*/
+template<
+	typename Iterator>
+	auto extract_reverse(
+		Iterator &&it)
+	noexcept -> decltype(
+		ted::peek(
+			decrement(
+				same(it))))
+{
+	return ted::peek(
+		decrement(
+			same(it)));
+}
+
+/*
+Stream insertion adapter for iterators.
+*/
+template<
+	typename Iterator,
+	typename Object>
+	auto insert(
+		Iterator &&it,
+		Object &&object)
+	noexcept -> decltype(
+		ted::peek(
+			increment(
+				same(it))))
+{
+	return assign(
+		ted::peek(
+			increment(
+				same(it))),
+		same(object));
+}
+
+/*
+Stream insertion adapter for iterators.
+*/
+template<
+	typename Iterator,
+	typename Object>
+	auto insert_reverse(
+		Iterator &&it,
+		Object &&object)
+	noexcept -> decltype(
+		ted::peek(
+			decrement(
+				same(it))))
+{
+	return assign(
+		ted::peek(
+			decrement(
+				same(it))),
+		same(object));
 }
 
 }
-
-#include <ted/nosame.hpp>
-#include <ted/noassuming.hpp>
 
 #endif

@@ -19,71 +19,73 @@ to 'bool'!
 
 namespace ted
 {
-    template<
-        typename T>
-        auto is_zero(
-            T &&x)
-        -> decltype(auto)
-    {
-        return equal(
-            same(x),
-            0);
-    }
 
-    template<
-        typename T>
-        auto is_nonzero(
-            T &&x)
-        -> decltype(auto)
-    {
-        return unequal(
-            same(x),
-            0);
-    }
-    
-    template<
-        typename T>
-        auto is_positive(
-            T &&x)
-        -> decltype(auto)
-    {
-        return greater(
-            same(x),
-            0);
-    }
+template<
+    typename T>
+auto is_zero(
+    T &&x)
+-> decltype(auto)
+{
+    return equal(
+        same(x),
+        0);
+}
 
-    template<
-        typename T>
-        auto is_negative(
-            T &&x)
-        -> decltype(auto)
-    {
-        return less(
-            same(x),
-            0);
-    }
-    
-    template<
-        typename T>
-        auto is_nonpositive(
-            T &&x)
-        -> decltype(auto)
-    {
-        return less_equal(
-            same(x),
-            0);
-    }
+template<
+    typename T>
+auto is_nonzero(
+    T &&x)
+-> decltype(auto)
+{
+    return unequal(
+        same(x),
+        0);
+}
 
-    template<
-        typename T>
-        auto is_nonnegative(
-            T &&x)
-        -> decltype(auto)
-    {
-        return greater_equal(
-            same(x),
-            0);
-    }
+template<
+    typename T>
+auto is_positive(
+    T &&x)
+-> decltype(auto)
+{
+    return greater(
+        same(x),
+        0);
+}
+
+template<
+    typename T>
+auto is_negative(
+    T &&x)
+-> decltype(auto)
+{
+    return less(
+        same(x),
+        0);
+}
+
+template<
+    typename T>
+auto is_nonpositive(
+    T &&x)
+-> decltype(auto)
+{
+    return less_equal(
+        same(x),
+        0);
+}
+
+template<
+    typename T>
+auto is_nonnegative(
+    T &&x)
+-> decltype(auto)
+{
+    return greater_equal(
+        same(x),
+        0);
+}
+
 }
 
 #endif

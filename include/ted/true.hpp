@@ -15,30 +15,40 @@ to 'bool'!
 #ifndef H_B05A95C9_4F53_4789_B523_4CEDDD640ECE
 #define H_B05A95C9_4F53_4789_B523_4CEDDD640ECE
 
-#include <ted/same.hpp>
+#include <ted/operator.hpp>
 
 namespace ted
 {
 
 template<
-	typename Self>
+	typename Object>
 	auto is_truthy(
-		Self &&self)
-	-> decltype(auto)
+		Object &&object)
+	-> decltype(
+		equal(
+			same(object),
+			true))
 {
+	using ted::equal;
+
 	return equal(
-		same(self),
+		same(object),
 		true);
 }
 
 template<
-	typename Self>
+	typename Object>
 	auto is_falsy(
-		Self &&self)
-	-> decltype(auto)
+		Object &&object)
+	-> decltype(
+		equal(
+			same(object),
+			false))
 {
+	using ted::equal;
+
 	return equal(
-		same(self),
+		same(object),
 		false);
 }
 

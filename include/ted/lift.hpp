@@ -3,6 +3,6 @@
 
 #include <ted/same.hpp>
 
-#define lift(f) [](auto &&...x) -> decltype(auto) { return f(same(x)...); }
+#define lift(...) [](auto &&...x) -> decltype(auto) { return __VA_ARGS__(same(x)...); }
 
 #endif

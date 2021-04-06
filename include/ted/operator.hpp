@@ -35,12 +35,12 @@ namespace ted
 template<                               \
     typename Lhs,                       \
     typename Rhs>                       \
-    constexpr auto name(                \
-        Lhs &&lhs,                      \
-        Rhs &&rhs)                      \
-    -> decltype(same(lhs) op same(rhs)) \
+constexpr auto name(                    \
+    Lhs &&a,                          \
+    Rhs &&b)                          \
+-> decltype(same(a) op same(b))     \
 {                                       \
-    return same(lhs) op same(rhs);      \
+    return same(a) op same(b);      \
 }                                       \
 
 infix_alias(assign, =)
@@ -76,15 +76,16 @@ infix_alias(greater_equal, >=)
 
 #undef infix_alias
 
-#define prefix_alias(name, op)          \
-template<                               \
-    typename Operand>                   \
-    constexpr auto name(                \
-        Operand &&operand)              \
-    -> decltype(op same(operand))       \
-{                                       \
-    return op same(operand);            \
-}                                       \
+#define prefix_alias(name, op)         \
+template<                              \
+    typename Object>                   \
+constexpr auto name(                   \
+    Object &&x)                   \
+-> decltype(                           \
+    op same(x))                   \
+{                                      \
+    return op same(x);            \
+}                                      \
 
 prefix_alias(plus, +)
 prefix_alias(minus, -)
@@ -97,92 +98,121 @@ prefix_alias(pre_decrement, --)
 
 #undef prefix_alias
 
+/**
+Post-increment `object`.
+*/
 template<
-    typename Operand>
-    constexpr auto increment(
-        Operand &&operand)
-    -> decltype(same(operand)++)
+    typename Object>
+constexpr auto increment(
+    Object &&x)
+-> decltype(
+    same(x)++)
 {
-    return same(operand)++;
+    return same(x)++;
 }
 
+/**
+Post-decrement `object`.
+*/
 template<
-    typename Operand>
-    constexpr auto decrement(
-        Operand &&operand)
-    -> decltype(same(operand)--)
+    typename Object>
+constexpr auto decrement(
+    Object &&x)
+-> decltype(
+    same(x)--)
 {
-    return same(operand)--;
+    return same(x)--;
 }
 
+/**
+Subscript `object` with `index`.
+*/
 template<
-    typename Self,
+    typename Object,
     typename Index>
-    constexpr auto subscript(
-        Self &&self,
-        Index &&i)
-    -> decltype(
-        same(self)[
-            same(i)])
+constexpr auto subscript(
+    Object &&x,
+    Index &&i)
+-> decltype(
+    same(x)[
+        same(i)])
 {
-    return same(self)[
+    return same(x)[
         same(i)];
 }
 
+/**
+Invoke `object` with `args`.
+*/
 template<
-    typename Self,
+    typename Function,
     typename ...Args>
-    constexpr auto invoke(
-        Self &&self,
-        Args &&...args)
-    -> decltype(
-        same(self)(
-            same(args)...))
+constexpr auto invoke(
+    Function &&f,
+    Args &&...x)
+-> decltype(
+    same(f)(
+        same(x)...))
 {
-    return same(self)(
-        same(args)...);
+    return same(f)(
+        same(x)...);
 }
 
+/**
+Default-initialize an `Object` at
+`address`.
+*/
 template<
     typename Object>
-    constexpr auto non_allocating_new_default(
-        Object *address)
-    -> Object *
+constexpr auto non_allocating_new_default(
+    Object *p)
+-> Object *
 {
-    return new (address) Object;
+    return new (p) Object;
 }
 
+/**
+Direct-initialize an `Object` at
+`address`.
+*/
 template<
     typename Object,
     typename ...Args>
     constexpr auto non_allocating_new(
-        Object *address,
-        Args &&...args)
+        Object *p,
+        Args &&...x)
     -> Object *
 {
-    return new (address) Object(
-        same(args)...);
+    return new (p) Object(
+        same(x)...);
 }
 
+/**
+Direct-list-initialize an `Object` at
+`address`.
+*/
 template<
     typename Object,
     typename ...Args>
     constexpr auto non_allocating_new_list(
-        Object *address,
-        Args &&...args)
+        Object *p,
+        Args &&...x)
     -> Object *
 {
-    return new (address) Object{
-        same(args)... };
+    return new (p) Object{
+        same(x)... };
 }
 
+/**
+Destroy `object`.
+*/
 template<
     typename Object>
     constexpr auto destroy(
-        Object &object)
+        Object &x)
     noexcept -> void
 {
-    object.~Object();
+    x.~Object();
 }
 
 }

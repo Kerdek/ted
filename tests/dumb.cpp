@@ -1,19 +1,28 @@
-#include <doctest/doctest.h>
-
 #include <ted/dumb.hpp>
+#include <ted/null.hpp>
+#include <ted/operator.hpp>
+
+#include <doctest/doctest.h>
 
 #include <memory>
 
 using namespace ted;
 
-TEST_CASE("'dumb' accepts 'unique_ptr'")
+TEST_CASE("dumb")
+{
+    INFO("lol dumb");
+    
+    auto p = new int;
+    CHECK(equal(p, (dumb(p))));
+    delete p;
+}
+TEST_CASE("unique")
 {
     auto p = std::make_unique<int>();
-    CHECK(dumb(p));
+    CHECK(equal(p.get(), dumb(p)));
 }
-
-TEST_CASE("'dumb' accepts 'shared_ptr'")
+TEST_CASE("shared")
 {
     auto p = std::make_shared<int>();
-    CHECK(dumb(p));
+    CHECK(equal(p.get(), dumb(p)));
 }

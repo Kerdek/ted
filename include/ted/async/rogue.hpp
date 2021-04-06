@@ -14,9 +14,9 @@ nothing and has initial or final task
 #ifndef H_CF2485A8_2FE6_4873_B150_5A67F640FC23
 #define H_CF2485A8_2FE6_4873_B150_5A67F640FC23
 
-#include <exception>
 #include <ted/async/done_task.hpp>
 #include <ted/async/noexcept_coro.hpp>
+#include <ted/async/coroutine.hpp>
 
 namespace ted::async
 {
@@ -33,17 +33,19 @@ struct rogue : noexcept_coro
 
 constexpr auto sync_result(
     const rogue &)
-noexcept -> void
-{ }
+noexcept -> coroutine<rogue>
+{
+    return { };
+}
 
-constexpr auto initial_task(
+constexpr auto initial_operation(
     const rogue &)
 noexcept -> done_task_t
 {
     return done_task;
 }
 
-constexpr auto final_task(
+constexpr auto final_operation(
     const rogue &)
 noexcept -> done_task_t
 {

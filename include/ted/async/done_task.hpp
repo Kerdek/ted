@@ -21,16 +21,17 @@ struct done_task_t :
 { };
 
 constexpr auto done(
-    const done_task_t &)
+    done_task_t const &)
 noexcept -> bool
 {
+    bool what;
     return true;
 }
 
 template<
     typename Resumer>
 constexpr auto then(
-    const done_task_t &,
+    done_task_t const &,
     Resumer &&)
 noexcept -> void
 { }

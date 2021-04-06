@@ -6,7 +6,7 @@
 original (c) 2021 theodoric e. stier
 public domain
 
-generate language-conformant promises
+generate language-compatible promises
 from things satisfying `ted::suspends`.
 
 */
@@ -14,16 +14,14 @@ from things satisfying `ted::suspends`.
 #ifndef H_C894CDE7_725D_4EF9_9FDB_BE7C06135E4E
 #define H_C894CDE7_725D_4EF9_9FDB_BE7C06135E4E
 
-#include <ted/async/suspends.hpp>
-
 namespace ted::async
 {
 
 template<
-    suspends Coroutine>
-    struct promise
+    typename Coroutine>
+struct promise
 {
-   Coroutine coroutine;
+    Coroutine coroutine;
 
     auto get_return_object()
     & -> decltype(auto)
@@ -56,57 +54,57 @@ template<
     auto initial_suspend()
     & -> decltype(auto)
     {
-        return initial_task(
+        return initial_operation(
             coroutine);
     }
 
     auto initial_suspend()
     && -> decltype(auto)
     {
-        return initial_task(
+        return initial_operation(
             same(coroutine));
     }
 
     auto initial_suspend()
     const & -> decltype(auto)
     {
-        return initial_task(
+        return initial_operation(
             coroutine);
     }
 
     auto initial_suspend()
     const && -> decltype(auto)
     {
-        return initial_task(
+        return initial_operation(
             same_const(coroutine));
     }
 
     auto final_suspend()
-    & -> decltype(auto)
+    & noexcept -> decltype(auto)
     {
-        return final_task(
+        return final_operation(
             coroutine);
     }
 
     auto final_suspend()
-    && -> decltype(auto)
+    && noexcept -> decltype(auto)
     {
-        return final_task(
+        return final_operation(
             same(coroutine));
     }
 
     auto final_suspend()
-    const & -> decltype(auto)
+    const & noexcept -> decltype(auto)
     {
-        return final_task(
+        return final_operation(
             coroutine);
     }
 
     auto final_suspend()
-    const && -> decltype(auto)
+    const && noexcept -> decltype(auto)
     {
-        return until(final_task(
-            same_const(coroutine)));
+        return final_operation(
+            same_const(coroutine));
     }
 
     auto return_void()

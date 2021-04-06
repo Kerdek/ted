@@ -13,10 +13,8 @@ our favorite range.
 #ifndef H_8FCD914D_66A0_4425_9AB3_E94964376165
 #define H_8FCD914D_66A0_4425_9AB3_E94964376165
 
-#include <ted/operator.hpp>
-
 #include <ted/assuming.hpp>
-#include <ted/same.hpp>
+#include <ted/operator.hpp>
 
 namespace ted::span
 {
@@ -32,7 +30,7 @@ template<
 
 template<
 	typename Span>
-	auto begin(
+	constexpr auto begin(
 		Span &&self)
 	noexcept -> decltype(auto)
 {
@@ -41,7 +39,7 @@ template<
 
 template<
 	typename Span>
-	auto end(
+	constexpr auto end(
 		Span &&self)
 	noexcept -> decltype(auto)
 {
@@ -56,17 +54,14 @@ namespace ted
 template<
 	typename Begin,
 	typename End>
-	auto make_span(
+	constexpr auto make_span(
 		Begin a,
 		End b)
-	noexcept -> span::span_t<Begin, End>
+	noexcept -> span::span_t<
+		Begin,
+		End>
 {
-	auto ordered = negate(
-		less(
-			b,
-			a));
-
-	assuming(ordered)
+	assuming(negate(less(b, a)))
 	{
 		return
 		{
@@ -77,8 +72,5 @@ template<
 }
 
 }
-
-#include <ted/nosame.hpp>
-#include <ted/noassuming.hpp>
 
 #endif
