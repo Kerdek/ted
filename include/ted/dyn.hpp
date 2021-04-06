@@ -17,63 +17,39 @@ the rest of libted. not callable with
 #ifndef H_88B7B750_A12C_4B1B_AD4A_DB4DDD39F14B
 #define H_88B7B750_A12C_4B1B_AD4A_DB4DDD39F14B
 
-#include <ted/category.hpp>
-#include <ted/pointer.hpp>
+#include <ted/hyp.hpp>
 #include <ted/ref.hpp>
 #include <ted/same.hpp>
 #include <ted/memfn.hpp>
 
-#include <memory>
 #include <type_traits>
-
 
 namespace ted
 {
 
 template<
-    typename Function>
-struct abstract_function;
-
-template<
-    typename Y,
-    typename ...X>
-struct abstract_function<
-    Y(X...)>
+    typename Result,
+    typename ...Args>
+struct abstract_function
 {
     virtual ~abstract_function()
     = default;
 
     memfnd(
-        virtual auto invoke_dyn(X &&...),
-        -> Y = 0)
+        virtual auto invoke_dyn(
+            Args &&...),
+        -> Result = 0)
 };
 
 template<
-    typename Abstract,
+    typename Invocable,
     typename ...Args>
-auto invoke_dyn(
-    Abstract &&self,
-    Args &&...x)
--> decltype(auto)
-{
-    return same(self).invoke_dyn(
-        same(x)...);
-}
-
-template<
-    typename Function,
-    typename Invocable>
-struct concrete_function;
-
-template<
-    typename Y,
-    typename ...X,
-    typename Invocable>
-struct concrete_function<
-    Y(X...),
-    Invocable> :
+struct concrete_function :
     abstract_function<
-        Y(X...)>
+        decltype(invoke(
+            obj(hyp(Invocable)),
+            hyp(Args)...)),
+        Args...>
 {
     Invocable f;
 
@@ -83,8 +59,10 @@ struct concrete_function<
     { }
 
     memfn(
-        auto invoke_dyn(X &&...x),
-        -> Y override,
+        auto invoke_dyn(Args &&...x),
+        -> decltype(invoke(
+            obj(f),
+            same(x)...)) override,
         invoke, f, same(x)...)
 };
 
@@ -96,25 +74,21 @@ auto invoke(
     Args &&...x)
 -> decltype(auto)
 {
-    return invoke_dyn(
-        ted::categorize_like<Erasure>(
-            ted::peek(same(f))),
+    return same(f).invoke_dyn(
         same(x)...);
 }
 
 template<
-    typename Signature,
+    typename ...Args,
     typename Invocable>
 auto dyn(
     Invocable &&f)
--> decltype(auto)
+-> concrete_function<
+    std::remove_reference_t<
+        Invocable>,
+    Args...>
 {
-    return std::make_unique<
-        concrete_function<
-            Signature,
-            std::remove_reference_t<
-                Invocable>>>(
-        same(f));
+    return { same(f) };
 }
 
 }

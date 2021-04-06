@@ -13,12 +13,12 @@ TEST_CASE("dyn")
     long y;
 
     auto f = [=] { return x; };
-    std::unique_ptr<abstract_function<long()>> g;
+    abstract_function<long>* a;
 
     SUBCASE("by value")
     {
-        g = dyn<long()>(f);
-        REQUIRE(g);
+        auto g = dyn(f);
+        a = &g;
 
         SUBCASE("invoked as lvalue")
         {
@@ -31,8 +31,8 @@ TEST_CASE("dyn")
     }
     SUBCASE("by reference object")
     {
-        g = dyn<long()>(ref(f));
-        REQUIRE(g);
+        auto g = dyn(ref(f));
+        a = &g;
 
         SUBCASE("invoked as lvalue")
         {

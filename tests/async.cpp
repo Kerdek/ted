@@ -8,7 +8,11 @@
 
 #include <doctest/doctest.h>
 
+#ifdef __clang__
 #include <experimental/coroutine>
+#else
+#include <coroutine>
+#endif
 
 using namespace ted;
 using namespace ted::async;
