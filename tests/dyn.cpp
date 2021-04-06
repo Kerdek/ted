@@ -1,3 +1,4 @@
+#include <memory>
 #include <ted/dyn.hpp>
 
 #include <doctest/doctest.h>
@@ -12,13 +13,13 @@ TEST_CASE("dyn")
     long y;
 
     auto f = [=] { return x; };
-    erasure::erasure_t<long()> g;
+    std::unique_ptr<abstract_function<long()>> g;
 
     SUBCASE("by value")
     {
         g = dyn<long()>(f);
         REQUIRE(g);
-        
+
         SUBCASE("invoked as lvalue")
         {
             y = invoke(g);
