@@ -21,8 +21,6 @@ using unqualified 'obj'
 
 #include <ted/ref.hpp>
 
-#include <coroutine>
-
 namespace ted::async
 {
 
