@@ -15,7 +15,6 @@ our favorite range.
 
 #include <ted/assuming.hpp>
 #include <ted/operator.hpp>
-#include <ted/same.hpp>
 
 namespace ted::span
 {
