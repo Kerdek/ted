@@ -50,9 +50,11 @@ template<
 }
 
 template<
-	range Range>
-	auto insert_reverse(
-		Range &&ab)
+	range Range,
+	typename Object>
+	auto insert_front(
+		Range &&ab,
+		Object &&object)
 	noexcept -> decltype(auto)
 {
 	return insert_reverse(
@@ -71,7 +73,7 @@ template<
 
 template<
 	range Range>
-	auto extract_reverse(
+	auto extract_back(
 		Range &&ab)
 	noexcept -> decltype(auto)
 {
