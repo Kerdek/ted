@@ -6,206 +6,304 @@
 original (c) 2021 theodoric e. stier
 public domain
 
-we put the atomic operations into
-a reasonably customizable form. 
-friendly with 'ref_obj'.
-these atomic operations automatically
-unwrap the reference.
-
 */
 
-#ifndef H_E3B5CD65_B490_4785_8EA1_50AB09F1CEB6
-#define H_E3B5CD65_B490_4785_8EA1_50AB09F1CEB6
+#ifndef H_B1B36C5A_F4DE_46A0_8458_97B7475C9851
+#define H_B1B36C5A_F4DE_46A0_8458_97B7475C9851
 
-#include <ted/ref.hpp>
-#include <ted/lift.hpp>
 #include <ted/memory_order.hpp>
 #include <ted/pointer.hpp>
+#include <ted/operator.hpp>
+#include <ted/lift.hpp>
+
+#include <atomic>
 
 namespace ted
 {
 
-/**
-
-`atomic_invoke` on the `args` and return
-the result.
-
-This function template controls the
-iterative instantiation of
-`atomic_invoke`. An atomic initiator or
-composed atomic operation should
-delegate to this function template
-to continue unwrapping the
-`AtomicObject`.
-
-*/
 template<
+	typename Scalar,
+	typename Operation,
 	typename ...Args>
-	auto atomic_result(
-		Args &&...args)
-	noexcept -> decltype(auto)
+auto atomic_result(
+	std::atomic<
+		Scalar> &x,
+	Operation &&f,
+	Args &&...y)
+noexcept -> decltype(auto)
 {
-	return atomic_invoke(
-		same(args)...);
-}
-
-template<
-	typename Object,
-	typename AtomicOp,
-	typename ...Args>
-	auto atomic_invoke(
-		std::atomic<Object> &object,
-		AtomicOp &&op,
-		Args &&...args)
-	noexcept -> decltype(auto)
-{
+	using ted::invoke;
 	return invoke(
-		same(op),
-		ted::address_of(object),
-		same(args)...);
+		same(f),
+		ted::address_of(x),
+		same(y)...);
 }
 
 template<
-	typename AtomicObject>
-	auto load(
-		AtomicObject &&object)
-	noexcept -> decltype(auto)
+	typename Atomic>
+struct fenced
+{
+	Atomic x;
+	memory_order o;
+};
+
+template<
+	typename Atomic,
+	typename Operation,
+	typename ...Args>
+auto atomic_result(
+	fenced<
+		Atomic> x,
+	Operation &&f,
+	Args &&...y)
+noexcept -> decltype(auto)
+{
+	return atomic_result(
+		x.x,
+		same(f),
+		same(y)...,
+		x.o);
+}
+
+template<
+	typename Atomic>
+constexpr
+auto fence(
+	fenced<
+		Atomic> x,
+	memory_order o)
+noexcept -> fenced<
+	fenced<
+		Atomic>>
+{
+	return { x, o };
+}
+
+template<
+	typename Scalar>
+constexpr
+auto fence(
+	std::atomic<
+		Scalar> &x,
+	memory_order o)
+noexcept -> fenced<
+	std::atomic<
+		Scalar> &>
+{
+	return { x, o };
+}
+
+template<
+	typename Atomic>
+constexpr
+auto relaxed(
+	Atomic &&x)
+noexcept -> decltype(auto)
+{
+	return fence(
+		x,
+		memory_order::relaxed);
+}
+
+template<
+	typename Atomic>
+constexpr
+auto acquire(
+	Atomic &&x)
+noexcept -> decltype(auto)
+{
+	return fence(
+		x,
+		memory_order::acquire);
+}
+
+template<
+	typename Atomic>
+constexpr
+auto release(
+	Atomic &&x)
+noexcept -> decltype(auto)
+{
+	return fence(
+		x,
+		memory_order::release);
+}
+
+template<
+	typename Atomic>
+constexpr
+auto acq_rel(
+	Atomic &&x)
+noexcept -> decltype(auto)
+{
+	return fence(
+		x,
+		memory_order::acq_rel);
+}
+
+template<
+	typename Atomic>
+constexpr
+auto seq_cst(
+	Atomic &&x)
+noexcept -> decltype(auto)
+{
+	return fence(
+		x,
+		memory_order::seq_cst);
+}
+
+template<
+	typename Atomic>
+auto load(
+	fenced<
+		Atomic> x)
+noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
-		same(object),
+		x,
 		lift(atomic_load_explicit));
 }
 
 template<
-	typename AtomicObject,
+	typename Atomic,
 	typename Value>
-	auto store(
-		AtomicObject &&object,
-		Value &&value)
-	noexcept -> decltype(auto)
+auto store(
+	fenced<
+		Atomic> x,
+	Value &&y)
+noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
-		same(object),
+		x,
 		lift(atomic_store_explicit),
-		same(value));
+		same(y));
 }
 
 template<
-	typename AtomicObject,
+	typename Atomic,
 	typename Value>
-	auto exchange(
-		AtomicObject &&object,
-		Value &&value)
-	noexcept -> decltype(auto)
+auto exchange(
+	fenced<
+		Atomic> x,
+	Value &&y)
+noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
-		same(object),
+		x,
 		lift(atomic_exchange_explicit),
-		same(value));
+		same(y));
 }
 
 template<
-	typename AtomicObject,
+	typename Atomic,
 	typename Expected,
 	typename Desired>
-	auto compare_exchange_strong(
-		AtomicObject &&object,
-		Expected &&expected,
-		Desired &&desired)
-	noexcept -> decltype(auto)
+auto compare_exchange_strong(
+	fenced<
+		Atomic> x,
+	Expected &&y,
+	Desired &&z)
+noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
-		same(object),
+		x,
 		lift(atomic_compare_exchange_strong_explicit),
-		same(expected),
-		same(desired));
+		ted::address_of(y),
+		same(z));
 }
 
 template<
-	typename AtomicObject,
+	typename Atomic,
 	typename Expected,
 	typename Desired>
-	auto compare_exchange_weak(
-		AtomicObject &&object,
-		Expected &&expected,
-		Desired &&desired)
-	noexcept -> decltype(auto)
+auto compare_exchange_weak(
+	fenced<
+		Atomic> x,
+	Expected &&y,
+	Desired &&z)
+noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
-		same(object),
+		x,
 		lift(atomic_compare_exchange_weak_explicit),
-		same(expected),
-		same(desired));
+		ted::address_of(y),
+		same(z));
 }
 
 template<
-	typename AtomicObject,
-	typename Amount>
-	auto fetch_add(
-		AtomicObject &&object,
-		Amount &&amount)
-	noexcept -> decltype(auto)
+	typename Atomic,
+	typename Value>
+auto fetch_add(
+	fenced<
+		Atomic> x,
+	Value &&y)
+noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
-		same(object),
+		x,
 		lift(atomic_fetch_add_explicit),
-		same(amount));
+		same(y));
 };
 
 template<
-	typename AtomicObject,
-	typename Amount>
-	auto fetch_sub(
-		AtomicObject &&object,
-		Amount &&amount)
-	noexcept -> decltype(auto)
+	typename Atomic,
+	typename Value>
+auto fetch_sub(
+	fenced<
+		Atomic> x,
+	Value &&y)
+noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
-		same(object),
+		x,
 		lift(atomic_fetch_sub_explicit),
-		same(amount));
+		same(y));
 }
 
 template<
-	typename AtomicObject,
-	typename Amount>
-	auto fetch_and(
-		AtomicObject &&object,
-		Amount &&amount)
-	noexcept -> decltype(auto)
+	typename Atomic,
+	typename Value>
+auto fetch_and(
+	fenced<
+		Atomic> x,
+	Value &&y)
+noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
-		same(object),
+		x,
 		lift(atomic_fetch_and_explicit),
-		same(amount));
+		same(y));
 }
 
 template<
-	typename AtomicObject,
-	typename Amount>
-	auto fetch_or(
-		AtomicObject &&object,
-		Amount &&amount)
-	noexcept -> decltype(auto)
+	typename Atomic,
+	typename Value>
+auto fetch_or(
+	fenced<
+		Atomic> x,
+	Value &&y)
+noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
-		same(object),
+		x,
 		lift(atomic_fetch_or_explicit),
-		same(amount));
+		same(y));
 }
 
 template<
-	typename AtomicObject,
-	typename Amount>
-	auto fetch_xor(
-		AtomicObject &&object,
-		Amount &&amount)
-	noexcept -> decltype(auto)
+	typename Atomic,
+	typename Value>
+auto fetch_xor(
+	fenced<
+		Atomic> x,
+	Value &&y)
+noexcept -> decltype(auto)
 {
 	return ted::atomic_result(
-		same(object),
+		x,
 		lift(atomic_fetch_xor_explicit),
-		same(amount));
+		same(y));
 }
 
 }
