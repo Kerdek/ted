@@ -23,170 +23,99 @@ the rest of libted. not callable with
 #include <ted/pointer.hpp>
 #include <ted/ref.hpp>
 #include <ted/same.hpp>
+#include <ted/memfn.hpp>
 
 #include <memory>
 #include <type_traits>
 
 
-namespace ted::erasure
+namespace ted
 {
 
 template<
-    typename F>
-    struct abstract_t;
+    typename Function>
+struct abstract_function;
 
 template<
     typename Y,
     typename ...X>
-    struct abstract_t<
-        Y(X...)>
+struct abstract_function<
+    Y(X...)>
 {
-    virtual ~abstract_t()
+    virtual ~abstract_function()
     = default;
 
-    virtual auto invoke_dyn(
-        X &&...)
-    & -> Y = 0;
-    virtual auto invoke_dyn(
-        X &&...)
-    && -> Y = 0;
-    virtual auto invoke_dyn(
-        X &&...)
-    const & -> Y = 0;
-    virtual auto invoke_dyn(
-        X &&...)
-    const && -> Y = 0;
+    memfnd(
+        virtual auto invoke_dyn(X &&...),
+        -> Y = 0)
 };
 
 template<
     typename Abstract,
     typename ...Args>
-    auto invoke_dyn(
-        Abstract &&self,
-        Args &&...x)
-    -> decltype(auto)
+auto invoke_dyn(
+    Abstract &&self,
+    Args &&...x)
+-> decltype(auto)
 {
     return same(self).invoke_dyn(
         same(x)...);
 }
 
 template<
-    typename F,
+    typename Function,
     typename Invocable>
-    struct concrete_t;
+struct concrete_function;
 
 template<
     typename Y,
     typename ...X,
-    typename InvocableObject>
-    struct concrete_t<
-        Y(X...),
-        InvocableObject> :
-        abstract_t<Y(X...)>
+    typename Invocable>
+struct concrete_function<
+    Y(X...),
+    Invocable> :
+    abstract_function<
+        Y(X...)>
 {
-    static_assert(
-        !std::is_reference_v<InvocableObject>,
-        "invocable type must be an\
-        object type.");
+    Invocable f;
 
-    InvocableObject f;
-
-    concrete_t(InvocableObject f) noexcept :
+    concrete_function(
+        Invocable f) :
         f(same(f))
     { }
 
-    auto invoke_dyn(
-        X &&...x)
-    & -> Y
-    override
-    {
-        return invoke(
-            obj(f),
-            same(x)...);
-    }
-
-    auto invoke_dyn(
-        X &&...x)
-    && -> Y
-    override
-    {
-        return invoke(
-            obj(same(f)),
-            same(x)...);
-    }
-
-    auto invoke_dyn(
-        X &&...x)
-    const & -> Y
-    override
-    {
-        return invoke(
-            obj(f),
-            same(x)...);
-    }
-
-    auto invoke_dyn(
-        X &&...x)
-    const && -> Y
-    override
-    {
-        return invoke(
-            obj(same_const(f)),
-            same(x)...);
-    }
+    memfn(
+        auto invoke_dyn(X &&...x),
+        -> Y override,
+        invoke, f, same(x)...)
 };
-
-template<
-    typename Invocable>
-using erasure_t =
-    std::unique_ptr<
-        abstract_t<Invocable>>;
-
-template<
-    typename Erasure>
-    auto abstract(
-        Erasure &&f)
-    noexcept -> decltype(auto)
-{
-    return categorize_like<Erasure>(
-        ted::peek(same(f)));
-}
 
 template<
     typename Erasure,
     typename ...Args>
-    auto invoke(
-        Erasure &&f,
-        Args &&...x)
-    -> decltype(auto)
+auto invoke(
+    Erasure &&f,
+    Args &&...x)
+-> decltype(auto)
 {
     return invoke_dyn(
-        abstract(same(f)),
+        categorize_like<Erasure>(
+            ted::peek(same(f))),
         same(x)...);
 }
-
-}
-
-namespace ted
-{
 
 template<
     typename Signature,
     typename Invocable>
-    auto dyn(
-        Invocable &&f)
-    -> erasure::erasure_t<
-        Signature>
+auto dyn(
+    Invocable &&f)
+-> decltype(auto)
 {
-    using InvocableObject =
-        std::remove_reference_t<
-            Invocable>;
-    using Concrete = 
-        erasure::concrete_t<
+    return std::make_unique<
+        concrete_function<
             Signature,
-            InvocableObject>;
-
-    return std::make_unique<Concrete>(
+            std::remove_reference_t<
+                Invocable>>>(
         same(f));
 }
 
