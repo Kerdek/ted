@@ -18,8 +18,6 @@ the rest of libted. not callable with
 #define H_88B7B750_A12C_4B1B_AD4A_DB4DDD39F14B
 
 #include <ted/category.hpp>
-#include <ted/hyp.hpp>
-#include <ted/iterator.hpp>
 #include <ted/pointer.hpp>
 #include <ted/ref.hpp>
 #include <ted/same.hpp>
@@ -99,7 +97,7 @@ auto invoke(
 -> decltype(auto)
 {
     return invoke_dyn(
-        categorize_like<Erasure>(
+        ted::categorize_like<Erasure>(
             ted::peek(same(f))),
         same(x)...);
 }
