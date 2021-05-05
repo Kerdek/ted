@@ -16,9 +16,9 @@ noexcept -> Begin
 {
     for (;;)
     {
-        for(; *begin; ++begin);
+        for(; begin != end && *begin; ++begin);
         if (begin == end) return begin;
-        for(; !*end; --end);
+        for(; begin != end && !*end; --end);
         std::swap(*begin, *end);
     }
 }
