@@ -8,12 +8,10 @@ namespace ted
 
 template<
     typename Begin,
-    typename End,
-    typename Relocate>
+    typename End>
 auto compact(
     Begin begin,
-    End end,
-    Relocate relocate)
+    End end)
 noexcept -> Begin
 {
     for (;;)
@@ -21,7 +19,7 @@ noexcept -> Begin
         for(; *begin; ++begin);
         if (begin == end) return begin;
         for(; !*end; --end);
-        relocate(begin, end);
+        std::swap(*begin, *end);
     }
 }
 
